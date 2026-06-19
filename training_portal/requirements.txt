@@ -4,4 +4,4 @@ cryptography==42.0.8
 python-dotenv==1.0.1
 pyOpenSSL==24.1.0
 gunicorn==22.0.0
-psycopg2-binary==2.9.9
+psycopg[binary]>=3.2,<4
