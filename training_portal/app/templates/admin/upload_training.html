@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block title %}Upload Training | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="section narrow">
+  <form class="panel form-panel" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <p class="eyebrow">Admin upload</p>
+    <h1>Add a training simulator</h1>
+    <label>Training title<input name="title" required placeholder="Python Interactive Training Simulator"></label>
+    <label>Description<textarea name="description" rows="5" placeholder="What clients will learn..."></textarea></label>
+    <div class="two-cols">
+      <label>Category<input name="category" placeholder="Python, SQL, Snowflake"></label>
+      <label>Level<input name="level" placeholder="Beginner, Intermediate, Advanced"></label>
+    </div>
+    <label>Simulator file<input name="training_file" type="file" accept=".html,.htm,.zip" required></label>
+    <p class="muted">Upload one HTML file or a ZIP bundle with index.html at the top level.</p>
+    <label class="check"><input type="checkbox" name="is_published" checked> Publish immediately</label>
+    <button class="btn" type="submit">Upload simulator</button>
+  </form>
+</section>
+{% endblock %}

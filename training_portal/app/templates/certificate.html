@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}Certificate | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="certificate-shell">
+  <div class="certificate">
+    <p class="eyebrow">Certificate of Completion</p>
+    <h1>{{ completion.training.title }}</h1>
+    <p class="cert-line">This certifies that</p>
+    <h2>{{ completion.user.display_name }}</h2>
+    <p class="cert-line">successfully completed this training on</p>
+    <h3>{{ issued_date }}</h3>
+    <p class="muted">Certificate ID: {{ completion.certificate_id }}</p>
+    <div class="signature-row">
+      <span>Training Administrator</span>
+      <span>{{ site_name }}</span>
+    </div>
+  </div>
+  <div class="center no-print"><button class="btn" onclick="window.print()">Print certificate</button></div>
+</section>
+{% endblock %}

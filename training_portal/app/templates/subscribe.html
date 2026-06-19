@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block title %}Subscribe | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="section narrow">
+  <div class="panel center">
+    <p class="eyebrow">Training access</p>
+    <h1>Unlock every simulator</h1>
+    <p>Your account status is <strong>{{ current_user.subscription_status }}</strong>.</p>
+    <p>Use a payment provider such as Stripe or PayPal for the small fee. This portal should never store credit card numbers directly.</p>
+    {% if payment_link %}
+      <a class="btn" href="{{ payment_link }}" target="_blank" rel="noopener">Pay for access</a>
+    {% else %}
+      <p class="notice">No PAYMENT_LINK is configured yet. Add a Stripe or PayPal payment link in your .env file.</p>
+    {% endif %}
+    <form method="post" class="inline-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-ghost" type="submit">Request admin access review</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block title %}Forum | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="section-head split">
+    <div><p class="eyebrow">Client community</p><h1>Training forum</h1></div>
+    <a class="btn" href="{{ url_for('main.new_topic') }}">New topic</a>
+  </div>
+  <form class="search-bar" method="get">
+    <input name="q" value="{{ q }}" placeholder="Search forum topics">
+    <button class="btn btn-small" type="submit">Search</button>
+  </form>
+  <div class="topic-list">
+    {% for topic in topics %}
+      <a class="topic-row" href="{{ url_for('main.topic_detail', topic_id=topic.id) }}">
+        <span class="topic-pin">{{ '📌' if topic.is_pinned else '💬' }}</span>
+        <span><strong>{{ topic.title }}</strong><small>By {{ topic.author.display_name }} • {{ topic.created_at|dt }} • {{ topic.posts|length }} replies</small></span>
+      </a>
+    {% else %}
+      <p>No forum topics yet. Start the first conversation.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

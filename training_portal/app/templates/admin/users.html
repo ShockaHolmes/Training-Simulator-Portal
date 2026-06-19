@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block title %}Clients | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="section-head split">
+    <div><p class="eyebrow">Access control</p><h1>Clients and administrators</h1></div>
+    <a class="btn btn-ghost" href="{{ url_for('main.admin_audit') }}">Audit log</a>
+  </div>
+  <div class="panel table-wrap">
+    <table>
+      <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Access</th><th>Enabled</th><th>Last login</th><th>Save</th></tr></thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td><strong>{{ user.display_name }}</strong><br><small>@{{ user.username }}</small></td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>
+              {% if user.is_admin %}
+                active
+              {% else %}
+              <form id="user-form-{{ user.id }}" method="post" action="{{ url_for('main.admin_update_user', user_id=user.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <select name="subscription_status">
+                  {% for status in ['pending','active','suspended'] %}<option value="{{ status }}" {% if user.subscription_status == status %}selected{% endif %}>{{ status }}</option>{% endfor %}
+                </select>
+              {% endif %}
+            </td>
+            <td>
+              {% if user.is_admin %}
+                yes
+              {% else %}
+                <label class="check"><input type="checkbox" name="is_enabled" form="user-form-{{ user.id }}" {% if user.is_enabled %}checked{% endif %}> Enabled</label>
+              {% endif %}
+            </td>
+            <td>{{ user.last_login_at|dt if user.last_login_at else '-' }}</td>
+            <td>
+              {% if user.is_admin %}
+                <span class="muted">Protected</span>
+              {% else %}
+                <button class="btn btn-small" type="submit" form="user-form-{{ user.id }}">Save</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

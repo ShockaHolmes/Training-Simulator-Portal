@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}Admin Settings | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="section narrow">
+  <form class="panel form-panel" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <p class="eyebrow">Admin security</p>
+    <h1>Change admin login</h1>
+    {% if current_user.must_change_password %}<div class="notice danger">Default admin credentials are active. Replace ADMIN/admin1 now.</div>{% endif %}
+    <label>Admin username<input name="username" value="{{ current_user.username }}" required></label>
+    <label>Current password<input name="current_password" type="password" autocomplete="current-password"></label>
+    <label>New admin password<input name="new_password" type="password" minlength="12" autocomplete="new-password"></label>
+    <button class="btn" type="submit">Save admin login</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block title %}{{ site_name }} | Secure Simulator Training{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">All-in-one client training portal</p>
+    <h1>Upload simulators. Sell access. Certify completion.</h1>
+    <p class="hero-text">A secure website for paid clients to sign up, sign in, launch your training simulators, talk in a forum, and receive certificates after completion.</p>
+    <div class="hero-actions">
+      {% if current_user %}
+        <a class="btn" href="{{ url_for('main.dashboard') }}">Go to dashboard</a>
+      {% else %}
+        <a class="btn" href="{{ url_for('main.signup') }}">Start training</a>
+        <a class="btn btn-ghost" href="{{ url_for('main.signin') }}">Client sign in</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <img src="{{ url_for('static', filename='img/learning-portal.svg') }}" alt="">
+  </div>
+</section>
+
+<section class="feature-grid">
+  <article class="feature-card"><span>🔐</span><h3>Secure auth</h3><p>Signup/signin, encrypted PII fields, password hashing, CSRF protection, and admin-controlled access.</p></article>
+  <article class="feature-card"><span>🎮</span><h3>Simulator launcher</h3><p>Admin can upload HTML or ZIP simulators and publish or remove them anytime.</p></article>
+  <article class="feature-card"><span>🏆</span><h3>Certificates</h3><p>Clients receive printable certificates with name, training title, date, and unique certificate ID.</p></article>
+  <article class="feature-card"><span>💬</span><h3>Client forum</h3><p>Active clients can ask questions, share wins, and support each other inside the portal.</p></article>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <p class="eyebrow">Featured simulators</p>
+    <h2>Training library</h2>
+  </div>
+  <div class="cards">
+    {% for training in trainings %}
+      <article class="training-card">
+        <div class="card-visual">{{ training.category[:2] if training.category else 'TS' }}</div>
+        <p class="muted">{{ training.category or 'Training' }} • {{ training.level or 'All levels' }}</p>
+        <h3>{{ training.title }}</h3>
+        <p>{{ training.description or 'Interactive simulator lesson.' }}</p>
+      </article>
+    {% else %}
+      <p>No simulators published yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

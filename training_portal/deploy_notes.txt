@@ -1,0 +1,6 @@
+Production deployment summary:
+1. Use Gunicorn, not Flask debug server.
+2. Put the app behind HTTPS from your host or Nginx + Let's Encrypt.
+3. Set SESSION_COOKIE_SECURE=true.
+4. Use managed Postgres for production if possible.
+5. Do not upload .env to GitHub.

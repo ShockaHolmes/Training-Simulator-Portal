@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block title %}Sign in | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="auth-shell">
+  <form class="panel form-panel" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <p class="eyebrow">Welcome back</p>
+    <h1>Sign in</h1>
+    <label>Username<input name="username" required autocomplete="username"></label>
+    <label>Password<input name="password" type="password" required autocomplete="current-password"></label>
+    <button class="btn" type="submit">Sign in securely</button>
+    <p class="muted">Initial admin login: <strong>ADMIN</strong> / <strong>admin1</strong>. Change it immediately before launching.</p>
+  </form>
+</section>
+{% endblock %}

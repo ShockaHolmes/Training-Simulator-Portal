@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}{{ topic.title }} | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="section narrowish">
+  <article class="panel topic-main">
+    <p class="eyebrow">Forum topic</p>
+    <h1>{{ topic.title }}</h1>
+    <p class="muted">By {{ topic.author.display_name }} • {{ topic.created_at|dt }}</p>
+    <p>{{ topic.body }}</p>
+    {% if current_user.is_admin %}
+      <form method="post" action="{{ url_for('main.admin_pin_topic', topic_id=topic.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-small btn-ghost" type="submit">{{ 'Unpin' if topic.is_pinned else 'Pin' }} topic</button>
+      </form>
+    {% endif %}
+  </article>
+
+  <div class="replies">
+    {% for post in topic.posts %}
+      <article class="panel reply"><strong>{{ post.author.display_name }}</strong><small>{{ post.created_at|dt }}</small><p>{{ post.body }}</p></article>
+    {% endfor %}
+  </div>
+
+  <form class="panel form-panel" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <h2>Reply</h2>
+    <label>Message<textarea name="body" required rows="5"></textarea></label>
+    <button class="btn" type="submit">Post reply</button>
+  </form>
+</section>
+{% endblock %}

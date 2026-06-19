@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}Training Dashboard | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="section-head split">
+    <div>
+      <p class="eyebrow">Client dashboard</p>
+      <h1>Welcome, {{ current_user.display_name }}</h1>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('main.forum') }}">Open forum</a>
+  </div>
+  <div class="cards">
+    {% for training in trainings %}
+      <article class="training-card">
+        <div class="card-visual">{{ training.category[:2] if training.category else 'TS' }}</div>
+        <p class="muted">{{ training.category or 'Training' }} • {{ training.level or 'All levels' }}</p>
+        <h3>{{ training.title }}</h3>
+        <p>{{ training.description or 'Interactive simulator lesson.' }}</p>
+        <div class="card-actions">
+          <a class="btn btn-small" href="{{ url_for('main.training_detail', training_id=training.id) }}">Launch</a>
+          {% if training.id in completed_ids %}
+            <a class="btn btn-small btn-ghost" href="{{ url_for('main.certificate', certificate_id=completed_ids[training.id].certificate_id) }}">Certificate</a>
+          {% endif %}
+        </div>
+      </article>
+    {% else %}
+      <p>No simulators are available yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

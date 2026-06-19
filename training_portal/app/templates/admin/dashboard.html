@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+{% block title %}Admin | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="section-head split">
+    <div><p class="eyebrow">Administrator control center</p><h1>Admin dashboard</h1></div>
+    <div class="hero-actions">
+      <a class="btn" href="{{ url_for('main.admin_upload_training') }}">Upload training</a>
+      <a class="btn btn-ghost" href="{{ url_for('main.admin_settings') }}">Settings</a>
+    </div>
+  </div>
+
+  {% if current_user.must_change_password %}
+    <div class="notice danger">You are still using the default admin setup. Change username/password before sharing this site.</div>
+  {% endif %}
+
+  <div class="stats-grid">
+    <div class="stat"><strong>{{ trainings|length }}</strong><span>Simulators</span></div>
+    <div class="stat"><strong>{{ pending_users|length }}</strong><span>Pending clients</span></div>
+    <div class="stat"><strong>{{ client_count }}</strong><span>Total clients</span></div>
+    <div class="stat"><strong>{{ completion_count }}</strong><span>Completions</span></div>
+  </div>
+
+  <section class="panel">
+    <div class="split"><h2>Pending access requests</h2><a href="{{ url_for('main.admin_users') }}">Manage all clients</a></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Client</th><th>Email</th><th>Joined</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for user in pending_users %}
+            <tr>
+              <td>{{ user.display_name }}<br><small>@{{ user.username }}</small></td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.created_at|dt }}</td>
+              <td>{{ user.subscription_status }}</td>
+              <td>
+                <form method="post" action="{{ url_for('main.admin_update_user', user_id=user.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="subscription_status" value="active">
+                  <input type="hidden" name="is_enabled" value="on">
+                  <button class="btn btn-small" type="submit">Activate</button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5">No pending requests.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="split"><h2>Training simulators</h2><a href="{{ url_for('main.admin_upload_training') }}">Upload new</a></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Title</th><th>Category</th><th>Level</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for training in trainings %}
+            <tr>
+              <td><strong>{{ training.title }}</strong><br><small>{{ training.slug }}</small></td>
+              <td>{{ training.category or '-' }}</td>
+              <td>{{ training.level or '-' }}</td>
+              <td>{{ 'Published' if training.is_published else 'Hidden' }}</td>
+              <td class="row-actions">
+                <a class="btn btn-small btn-ghost" href="{{ url_for('main.training_detail', training_id=training.id) }}">Preview</a>
+                <form method="post" action="{{ url_for('main.admin_toggle_training', training_id=training.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-small" type="submit">{{ 'Hide' if training.is_published else 'Publish' }}</button>
+                </form>
+                <form method="post" action="{{ url_for('main.admin_delete_training', training_id=training.id) }}" onsubmit="return confirm('Remove this training simulator?')">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-small btn-danger" type="submit">Remove</button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5">No simulators uploaded yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+{% endblock %}

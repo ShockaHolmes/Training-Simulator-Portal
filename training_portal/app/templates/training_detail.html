@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block title %}{{ training.title }} | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="section training-page">
+  <div class="section-head split">
+    <div>
+      <p class="eyebrow">{{ training.category or 'Simulator' }} • {{ training.level or 'All levels' }}</p>
+      <h1>{{ training.title }}</h1>
+      <p>{{ training.description }}</p>
+    </div>
+    {% if completion %}
+      <a class="btn btn-ghost" href="{{ url_for('main.certificate', certificate_id=completion.certificate_id) }}">View certificate</a>
+    {% endif %}
+  </div>
+
+  <div class="simulator-frame-wrap">
+    <iframe class="simulator-frame" src="{{ url_for('main.training_content', training_id=training.id, filename=training.launch_file) }}" title="{{ training.title }}" sandbox="allow-scripts allow-forms allow-pointer-lock allow-popups"></iframe>
+  </div>
+
+  <form method="post" action="{{ url_for('main.complete_training', training_id=training.id) }}" class="complete-bar">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div>
+      <strong>Finished this simulator?</strong>
+      <span class="muted">Mark complete to create a certificate with your name and today’s date.</span>
+    </div>
+    <button class="btn" type="submit">Mark Complete</button>
+  </form>
+</section>
+{% endblock %}

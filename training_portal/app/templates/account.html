@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}Account | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="section narrow">
+  <form class="panel form-panel" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <p class="eyebrow">Profile and password</p>
+    <h1>Your account</h1>
+    <label>Name<input name="name" value="{{ current_user.display_name }}"></label>
+    <label>Email<input name="email" type="email" value="{{ current_user.email }}"></label>
+    <hr>
+    <label>Current password<input name="current_password" type="password" autocomplete="current-password"></label>
+    <label>New password<input name="new_password" type="password" minlength="10" autocomplete="new-password"></label>
+    <button class="btn" type="submit">Save changes</button>
+  </form>
+</section>
+{% endblock %}

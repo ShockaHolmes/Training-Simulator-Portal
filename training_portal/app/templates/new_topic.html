@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block title %}New Topic | {{ site_name }}{% endblock %}
+{% block content %}
+<section class="section narrow">
+  <form class="panel form-panel" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <p class="eyebrow">Start a discussion</p>
+    <h1>New forum topic</h1>
+    <label>Title<input name="title" required></label>
+    <label>Message<textarea name="body" required rows="8"></textarea></label>
+    <button class="btn" type="submit">Post topic</button>
+  </form>
+</section>
+{% endblock %}
