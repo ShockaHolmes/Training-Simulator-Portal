@@ -1,0 +1,3754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salesforce Quest | Interactive Training Simulator</title>
+  <style>
+:root {
+  --bg: #071421;
+  --panel: rgba(255, 255, 255, 0.08);
+  --panel-strong: rgba(255, 255, 255, 0.13);
+  --text: #f5fbff;
+  --muted: #b7c7d8;
+  --brand: #2e9eff;
+  --brand-2: #00d7a7;
+  --danger: #ff6b7a;
+  --warn: #ffd166;
+  --ok: #74f2a9;
+  --border: rgba(255, 255, 255, 0.14);
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  --radius: 22px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(46, 158, 255, .25), transparent 34rem),
+    radial-gradient(circle at 85% 0%, rgba(0, 215, 167, .18), transparent 36rem),
+    linear-gradient(135deg, #071421, #06101b 45%, #0b1320);
+}
+
+button, input, select, textarea { font: inherit; }
+
+button {
+  border: 0;
+  border-radius: 999px;
+  padding: .8rem 1.1rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease, border .15s ease;
+}
+
+button:hover { transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+
+.primary {
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color: #03111e;
+  font-weight: 800;
+  box-shadow: 0 12px 30px rgba(46, 158, 255, .22);
+}
+
+.ghost {
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid var(--border);
+}
+
+.small { padding: .55rem .8rem; font-size: .9rem; }
+
+.app-shell { width: min(1780px, 96vw); margin: 0 auto; padding: 2rem 0 3rem; }
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, .08);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.eyebrow {
+  margin: 0 0 .4rem;
+  color: var(--brand-2);
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+h1 { margin: 0; font-size: clamp(2rem, 4vw, 4.2rem); line-height: .96; }
+h2, h3 { margin-top: 0; }
+.hero-copy { color: var(--muted); max-width: 78ch; line-height: 1.65; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: flex-end; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.stat-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1rem;
+  background: var(--panel);
+}
+.stat-card span { display: block; color: var(--muted); font-size: .85rem; margin-bottom: .3rem; }
+.stat-card strong { font-size: 1.8rem; }
+
+.layout {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr) 310px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+
+.sidebar, .rightbar { position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow: auto; }
+.workspace { display: grid; gap: 1rem; }
+
+.panel-header, .lesson-topline, .coach-row, .button-row, .lesson-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.lesson-tools input, select, input, textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, .17);
+  border-radius: 14px;
+  background: rgba(2, 10, 18, .7);
+  color: var(--text);
+  padding: .8rem .9rem;
+  outline: none;
+}
+
+textarea { resize: vertical; line-height: 1.5; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+label { color: var(--muted); display: grid; gap: .4rem; }
+
+.lesson-list { display: grid; gap: .55rem; margin-top: 1rem; }
+.lesson-card {
+  padding: .85rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .055);
+  cursor: pointer;
+}
+.lesson-card:hover, .lesson-card.active { background: var(--panel-strong); border-color: rgba(46, 158, 255, .6); }
+.lesson-card.completed { border-color: rgba(116, 242, 169, .5); }
+.lesson-card strong { display: block; font-size: .94rem; }
+.lesson-card span { display: block; color: var(--muted); font-size: .78rem; margin-top: .3rem; }
+
+.chip {
+  display: inline-flex;
+  margin: 0 0 .45rem;
+  padding: .35rem .65rem;
+  border-radius: 999px;
+  background: rgba(46, 158, 255, .16);
+  color: #bde4ff;
+  border: 1px solid rgba(46, 158, 255, .35);
+  font-weight: 800;
+  font-size: .8rem;
+}
+
+.concept { color: var(--muted); line-height: 1.65; }
+.steps { color: #d8e9f9; line-height: 1.7; padding-left: 1.4rem; }
+.steps li { margin: .28rem 0; }
+
+.feedback {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  line-height: 1.55;
+  background: rgba(255, 255, 255, .055);
+}
+.feedback.success { border-color: rgba(116, 242, 169, .55); background: rgba(116, 242, 169, .1); }
+.feedback.error { border-color: rgba(255, 107, 122, .55); background: rgba(255, 107, 122, .1); }
+.feedback.warning { border-color: rgba(255, 209, 102, .55); background: rgba(255, 209, 102, .1); color: #fff3c4; }
+.feedback.info { border-color: rgba(46, 158, 255, .35); }
+
+.tabs { display: flex; gap: .5rem; overflow-x: auto; margin-bottom: 1rem; }
+.tab { background: rgba(255, 255, 255, .06); border: 1px solid var(--border); white-space: nowrap; }
+.tab.active { background: rgba(46, 158, 255, .22); border-color: rgba(46, 158, 255, .55); }
+.tab-page { display: none; }
+.tab-page.active { display: block; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .9rem;
+  margin: 1rem 0;
+}
+.full { grid-column: 1 / -1; }
+.code-editor { width: 100%; min-height: 230px; }
+
+.data-preview {
+  margin-top: 1rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(2, 10, 18, .56);
+  padding: .9rem;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.table th, .table td { padding: .55rem; border-bottom: 1px solid rgba(255, 255, 255, .1); text-align: left; vertical-align: top; }
+.table th { color: #bde4ff; }
+pre { white-space: pre-wrap; word-break: break-word; color: #d7f6ff; margin: 0; }
+
+.badge-list { display: grid; gap: .7rem; }
+.badge {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .75rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, .055);
+}
+.badge.locked { opacity: .45; }
+.badge-icon { font-size: 1.6rem; }
+.badge strong { display: block; }
+.badge span { color: var(--muted); font-size: .8rem; }
+.snapshot, .error-log { color: var(--muted); line-height: 1.55; }
+.snapshot ul { padding-left: 1.1rem; }
+.error-log .err { color: #ffd3d8; border-bottom: 1px solid rgba(255, 255, 255, .1); padding-bottom: .6rem; margin-bottom: .6rem; }
+
+@media (max-width: 1300px) {
+  .layout { grid-template-columns: 300px minmax(0, 1fr); }
+  .rightbar { position: static; grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); max-height: none; }
+}
+
+@media (max-width: 900px) {
+  .hero { align-items: flex-start; flex-direction: column; }
+  .stats-grid, .layout, .rightbar { grid-template-columns: 1fr; }
+  .sidebar { position: static; max-height: 420px; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Salesforce Quest</p>
+        <h1>Interactive Salesforce Training Simulator</h1>
+        <p class="hero-copy">Learn Salesforce step by step inside a mock org. Create records, build fields, write SOQL, design reports, automate with flows, earn badges, and get corrected when something breaks.</p>
+      </div>
+      <div class="hero-actions">
+        <button id="newSessionBtn" class="primary">New Mixed Session</button>
+        <button id="resetBtn" class="ghost">Reset Progress</button>
+      </div>
+    </header>
+
+    <section class="stats-grid" aria-label="Progress stats">
+      <article class="stat-card">
+        <span>XP</span>
+        <strong id="xpStat">0</strong>
+      </article>
+      <article class="stat-card">
+        <span>Completed</span>
+        <strong id="completedStat">0 / 100</strong>
+      </article>
+      <article class="stat-card">
+        <span>Badges</span>
+        <strong id="badgeStat">0</strong>
+      </article>
+      <article class="stat-card">
+        <span>Streak</span>
+        <strong id="streakStat">0</strong>
+      </article>
+    </section>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Lesson Path</h2>
+            <select id="trackFilter" aria-label="Filter lessons">
+              <option value="all">All tracks</option>
+            </select>
+          </div>
+          <div class="lesson-tools">
+            <input id="lessonSearch" type="search" placeholder="Search lessons..." />
+          </div>
+          <div id="lessonList" class="lesson-list"></div>
+        </div>
+      </aside>
+
+      <section class="workspace">
+        <article class="panel lesson-panel">
+          <div class="lesson-topline">
+            <div>
+              <p id="lessonLevel" class="chip">Beginner</p>
+              <h2 id="lessonTitle">Choose a lesson</h2>
+            </div>
+            <div class="lesson-controls">
+              <button id="prevLessonBtn" class="small ghost">Previous</button>
+              <button id="nextLessonBtn" class="small ghost">Next</button>
+              <button id="completeBtn" class="small primary">Check Lesson</button>
+            </div>
+          </div>
+          <p id="lessonConcept" class="concept">Pick a lesson from the left to begin.</p>
+          <ol id="lessonSteps" class="steps"></ol>
+          <div class="coach-row">
+            <button id="hintBtn" class="ghost">Coach Hint</button>
+            <button id="speakLessonBtn" class="ghost">Read Lesson</button>
+            <button id="demoBtn" class="ghost">Show Correct Example</button>
+          </div>
+          <div id="feedback" class="feedback info">The simulator will guide you through a safe practice version of common Salesforce tasks.</div>
+        </article>
+
+        <article class="panel tabs-panel">
+          <nav class="tabs" aria-label="Training workbench">
+            <button class="tab active" data-tab="records">Data</button>
+            <button class="tab" data-tab="setup">Setup</button>
+            <button class="tab" data-tab="soql">SOQL</button>
+            <button class="tab" data-tab="reports">Reports</button>
+            <button class="tab" data-tab="automation">Automation</button>
+            <button class="tab" data-tab="audio">Audio</button>
+          </nav>
+
+          <section id="records" class="tab-page active">
+            <h3>Mock Salesforce Data Environment</h3>
+            <p>Create and update records like Accounts, Contacts, Leads, Opportunities, Cases, Campaigns, Tasks, Products, and custom objects.</p>
+            <div class="form-grid">
+              <label>Action
+                <select id="recordAction">
+                  <option value="create">Create Record</option>
+                  <option value="update">Update Record</option>
+                  <option value="delete">Delete Record</option>
+                  <option value="import">Import JSON Records</option>
+                </select>
+              </label>
+              <label>Object
+                <select id="recordObject"></select>
+              </label>
+              <label class="update-field">Find Field
+                <input id="findField" placeholder="Name" />
+              </label>
+              <label class="update-field">Find Value
+                <input id="findValue" placeholder="Acme Robotics" />
+              </label>
+              <label class="full">Fields / Updates as JSON
+                <textarea id="recordJson" rows="8" spellcheck="false">{
+  "Name": "Acme Robotics",
+  "Industry": "Manufacturing"
+}</textarea>
+              </label>
+            </div>
+            <button id="runRecordBtn" class="primary">Run Data Action</button>
+            <div id="dataPreview" class="data-preview"></div>
+          </section>
+
+          <section id="setup" class="tab-page">
+            <h3>Setup & Object Manager</h3>
+            <p>Build a simulated Salesforce configuration: custom objects, fields, validation rules, relationships, users, permission sets, sharing rules, record types, page layout fields, and app assets.</p>
+            <div class="form-grid">
+              <label>Setup Action
+                <select id="setupAction">
+                  <option value="createObject">Create Object</option>
+                  <option value="createField">Create Field</option>
+                  <option value="createValidationRule">Create Validation Rule</option>
+                  <option value="createRelationship">Create Relationship</option>
+                  <option value="createPermissionSet">Create Permission Set</option>
+                  <option value="createUser">Create User</option>
+                  <option value="createMetadata">Create Admin Asset</option>
+                </select>
+              </label>
+              <label>Target Object
+                <select id="setupObject"></select>
+              </label>
+              <label>API Name / Name
+                <input id="setupName" placeholder="Customer_Tier__c" />
+              </label>
+              <label>Label / Type / Asset Kind
+                <input id="setupKind" placeholder="Picklist" />
+              </label>
+              <label class="full">Configuration JSON
+                <textarea id="setupJson" rows="8" spellcheck="false">{
+  "label": "Customer Tier",
+  "type": "Picklist",
+  "values": ["Bronze", "Silver", "Gold"]
+}</textarea>
+              </label>
+            </div>
+            <button id="runSetupBtn" class="primary">Run Setup Action</button>
+            <div id="setupPreview" class="data-preview"></div>
+          </section>
+
+          <section id="soql" class="tab-page">
+            <h3>SOQL Query Studio</h3>
+            <p>Practice Salesforce Object Query Language with SELECT, FROM, WHERE, ORDER BY, and LIMIT in this simulated org.</p>
+            <textarea id="soqlEditor" class="code-editor" rows="8" spellcheck="false">SELECT Name, Industry FROM Account LIMIT 10</textarea>
+            <div class="button-row">
+              <button id="runSoqlBtn" class="primary">Run SOQL</button>
+              <button id="sampleSoqlBtn" class="ghost">Insert Sample</button>
+            </div>
+            <div id="soqlOutput" class="data-preview"></div>
+          </section>
+
+          <section id="reports" class="tab-page">
+            <h3>Reports & Dashboards</h3>
+            <p>Create report definitions and dashboard cards from your mock data.</p>
+            <div class="form-grid">
+              <label>Name
+                <input id="reportName" placeholder="Open Opportunities by Stage" />
+              </label>
+              <label>Object
+                <select id="reportObject"></select>
+              </label>
+              <label>Group By
+                <input id="reportGroup" placeholder="StageName" />
+              </label>
+              <label>Filter
+                <input id="reportFilter" placeholder="IsClosed = false" />
+              </label>
+            </div>
+            <div class="button-row">
+              <button id="createReportBtn" class="primary">Create Report</button>
+              <button id="createDashboardBtn" class="ghost">Create Dashboard From Report</button>
+            </div>
+            <div id="reportPreview" class="data-preview"></div>
+          </section>
+
+          <section id="automation" class="tab-page">
+            <h3>Flow Builder Lab</h3>
+            <p>Create simple record-triggered flows. The simulator stores your flow and can apply basic field updates when matching records are created.</p>
+            <div class="form-grid">
+              <label>Flow Name
+                <input id="flowName" placeholder="Set High Value Flag" />
+              </label>
+              <label>Object
+                <select id="flowObject"></select>
+              </label>
+              <label>Trigger
+                <select id="flowTrigger">
+                  <option value="afterCreate">After Create</option>
+                  <option value="beforeSave">Before Save</option>
+                  <option value="scheduled">Scheduled</option>
+                </select>
+              </label>
+              <label>Condition
+                <input id="flowCondition" placeholder="Amount > 50000" />
+              </label>
+              <label>Update Field
+                <input id="flowUpdateField" placeholder="Priority__c" />
+              </label>
+              <label>Update Value
+                <input id="flowUpdateValue" placeholder="High" />
+              </label>
+            </div>
+            <button id="createFlowBtn" class="primary">Create Flow</button>
+            <div id="flowPreview" class="data-preview"></div>
+          </section>
+
+          <section id="audio" class="tab-page">
+            <h3>Lesson Audio</h3>
+            <p>Use Web Speech for free local playback or connect an ElevenLabs API key to read lessons with generated voice audio.</p>
+            <div class="form-grid">
+              <label>Audio Mode
+                <select id="audioMode">
+                  <option value="browser">Browser Speech</option>
+                  <option value="elevenlabs">ElevenLabs API</option>
+                </select>
+              </label>
+              <label>ElevenLabs API Key
+                <input id="elevenKey" type="password" placeholder="Stored only in this browser" />
+              </label>
+              <label>Voice ID
+                <input id="elevenVoice" placeholder="EXAVITQu4vr4xnSDxMaL" />
+              </label>
+              <label>Model ID
+                <input id="elevenModel" placeholder="eleven_multilingual_v2" />
+              </label>
+            </div>
+            <button id="saveAudioBtn" class="primary">Save Audio Settings</button>
+            <audio id="audioPlayer" controls></audio>
+            <div class="feedback warning">For production, proxy ElevenLabs through a backend so your API key is not exposed in browser code.</div>
+          </section>
+        </article>
+      </section>
+
+      <aside class="rightbar">
+        <div class="panel">
+          <h2>Badges</h2>
+          <div id="badgeList" class="badge-list"></div>
+        </div>
+        <div class="panel">
+          <h2>Org Snapshot</h2>
+          <div id="orgSnapshot" class="snapshot"></div>
+        </div>
+        <div class="panel">
+          <h2>Error Coach</h2>
+          <div id="errorLog" class="error-log">No errors yet. Try a lesson and the coach will explain mistakes.</div>
+        </div>
+      </aside>
+    </main>
+  </div>
+  <script>
+// 100 interactive Salesforce training lessons for Salesforce Quest.
+window.SFQ_LESSONS = [
+  {
+    "id": "SF-001",
+    "title": "Create your first Account",
+    "level": "Beginner",
+    "track": "CRM Foundations",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Account",
+      "fields": {
+        "Name": "Acme Robotics",
+        "Industry": "Manufacturing"
+      }
+    },
+    "concept": "Accounts represent companies or organizations you do business with.",
+    "steps": [
+      "Open Data.",
+      "Choose Create Record.",
+      "Select Account.",
+      "Enter Name and Industry in JSON.",
+      "Run the action and check the lesson."
+    ],
+    "hint": "Account records need a Name. Add Industry to make the record useful for reporting.",
+    "demo": "{\"Name\":\"Acme Robotics\",\"Industry\":\"Manufacturing\"}"
+  },
+  {
+    "id": "SF-002",
+    "title": "Add a Contact to an Account",
+    "level": "Beginner",
+    "track": "CRM Foundations",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Contact",
+      "fields": {
+        "FirstName": "Maya",
+        "LastName": "Brooks",
+        "AccountName": "Acme Robotics",
+        "Email": "maya.brooks@example.com"
+      }
+    },
+    "concept": "Contacts are people connected to an Account.",
+    "steps": [
+      "Open Data.",
+      "Create a Contact record.",
+      "Use FirstName, LastName, AccountName, and Email.",
+      "Run the action."
+    ],
+    "hint": "Use AccountName to simulate linking this person to Acme Robotics.",
+    "demo": "{\"FirstName\":\"Maya\",\"LastName\":\"Brooks\",\"AccountName\":\"Acme Robotics\",\"Email\":\"maya.brooks@example.com\"}"
+  },
+  {
+    "id": "SF-003",
+    "title": "Capture a new Lead",
+    "level": "Beginner",
+    "track": "CRM Foundations",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Lead",
+      "fields": {
+        "FirstName": "Darius",
+        "LastName": "Cole",
+        "Company": "Cole Solar",
+        "Status": "Open - Not Contacted"
+      }
+    },
+    "concept": "Leads are potential customers that have not been qualified yet.",
+    "steps": [
+      "Create a Lead record.",
+      "Include a name, company, and Status.",
+      "Set Status to Open - Not Contacted."
+    ],
+    "hint": "Lead Status tracks the stage before conversion.",
+    "demo": "{\"FirstName\":\"Darius\",\"LastName\":\"Cole\",\"Company\":\"Cole Solar\",\"Status\":\"Open - Not Contacted\"}"
+  },
+  {
+    "id": "SF-004",
+    "title": "Create an Opportunity",
+    "level": "Beginner",
+    "track": "Sales Cloud",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Opportunity",
+      "fields": {
+        "Name": "Acme Solar Upgrade",
+        "StageName": "Prospecting",
+        "Amount": 25000,
+        "CloseDate": "2026-07-30"
+      }
+    },
+    "concept": "Opportunities track potential revenue and sales stages.",
+    "steps": [
+      "Create an Opportunity.",
+      "Add Name, StageName, Amount, and CloseDate.",
+      "Run the action."
+    ],
+    "hint": "Use a real sales stage like Prospecting.",
+    "demo": "{\"Name\":\"Acme Solar Upgrade\",\"StageName\":\"Prospecting\",\"Amount\":25000,\"CloseDate\":\"2026-07-30\"}"
+  },
+  {
+    "id": "SF-005",
+    "title": "Log a customer Case",
+    "level": "Beginner",
+    "track": "Service Cloud",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Case",
+      "fields": {
+        "Subject": "Login issue",
+        "Status": "New",
+        "Priority": "High",
+        "Origin": "Phone"
+      }
+    },
+    "concept": "Cases track customer support requests.",
+    "steps": [
+      "Create a Case.",
+      "Give it a Subject, Status, Priority, and Origin.",
+      "Run the action."
+    ],
+    "hint": "A new customer issue should usually begin with Status New.",
+    "demo": "{\"Subject\":\"Login issue\",\"Status\":\"New\",\"Priority\":\"High\",\"Origin\":\"Phone\"}"
+  },
+  {
+    "id": "SF-006",
+    "title": "Add a follow-up Task",
+    "level": "Beginner",
+    "track": "Productivity",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Task",
+      "fields": {
+        "Subject": "Call Maya about proposal",
+        "Status": "Not Started",
+        "Priority": "Normal"
+      }
+    },
+    "concept": "Tasks help teams remember follow-up work.",
+    "steps": [
+      "Create a Task record.",
+      "Set Subject, Status, and Priority.",
+      "Run the action."
+    ],
+    "hint": "Use Status Not Started for work that has not begun.",
+    "demo": "{\"Subject\":\"Call Maya about proposal\",\"Status\":\"Not Started\",\"Priority\":\"Normal\"}"
+  },
+  {
+    "id": "SF-007",
+    "title": "Create a Campaign",
+    "level": "Beginner",
+    "track": "Marketing",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Campaign",
+      "fields": {
+        "Name": "Summer Solar Webinar",
+        "Type": "Webinar",
+        "Status": "Planned"
+      }
+    },
+    "concept": "Campaigns organize marketing efforts and track responses.",
+    "steps": [
+      "Create a Campaign.",
+      "Add Name, Type, and Status.",
+      "Run the action."
+    ],
+    "hint": "A webinar campaign should have Type Webinar.",
+    "demo": "{\"Name\":\"Summer Solar Webinar\",\"Type\":\"Webinar\",\"Status\":\"Planned\"}"
+  },
+  {
+    "id": "SF-008",
+    "title": "Add a Campaign Member",
+    "level": "Beginner",
+    "track": "Marketing",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "CampaignMember",
+      "fields": {
+        "CampaignName": "Summer Solar Webinar",
+        "LeadName": "Darius Cole",
+        "Status": "Sent"
+      }
+    },
+    "concept": "Campaign Members connect leads or contacts to a marketing campaign.",
+    "steps": [
+      "Create a CampaignMember record.",
+      "Use CampaignName, LeadName, and Status.",
+      "Run the action."
+    ],
+    "hint": "Campaign member status often starts at Sent or Responded.",
+    "demo": "{\"CampaignName\":\"Summer Solar Webinar\",\"LeadName\":\"Darius Cole\",\"Status\":\"Sent\"}"
+  },
+  {
+    "id": "SF-009",
+    "title": "Create a Product",
+    "level": "Beginner",
+    "track": "Sales Cloud",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Product2",
+      "fields": {
+        "Name": "Solar Starter Kit",
+        "IsActive": true,
+        "ProductCode": "SSK-100"
+      }
+    },
+    "concept": "Products are items or services your company sells.",
+    "steps": [
+      "Create a Product2 record.",
+      "Add Name, IsActive, and ProductCode.",
+      "Run the action."
+    ],
+    "hint": "Active products can be added to sales processes.",
+    "demo": "{\"Name\":\"Solar Starter Kit\",\"IsActive\":true,\"ProductCode\":\"SSK-100\"}"
+  },
+  {
+    "id": "SF-010",
+    "title": "Create a Contract",
+    "level": "Beginner",
+    "track": "Sales Cloud",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Contract",
+      "fields": {
+        "AccountName": "Acme Robotics",
+        "Status": "Draft",
+        "ContractTerm": 12
+      }
+    },
+    "concept": "Contracts track agreements after a sale.",
+    "steps": [
+      "Create a Contract.",
+      "Set AccountName, Status, and ContractTerm.",
+      "Run the action."
+    ],
+    "hint": "Draft contracts are not activated yet.",
+    "demo": "{\"AccountName\":\"Acme Robotics\",\"Status\":\"Draft\",\"ContractTerm\":12}"
+  },
+  {
+    "id": "SF-011",
+    "title": "Update an Account industry",
+    "level": "Beginner",
+    "track": "CRM Foundations",
+    "xp": 50,
+    "task": {
+      "action": "updateRecord",
+      "object": "Account",
+      "find": {
+        "Name": "Acme Robotics"
+      },
+      "updates": {
+        "Industry": "Energy"
+      }
+    },
+    "concept": "Updating records keeps CRM data current.",
+    "steps": [
+      "Open Data.",
+      "Choose Update Record.",
+      "Find Account where Name is Acme Robotics.",
+      "Update Industry to Energy."
+    ],
+    "hint": "Use Find Field Name and Find Value Acme Robotics, then put updates in JSON.",
+    "demo": "{\"Industry\":\"Energy\"}"
+  },
+  {
+    "id": "SF-012",
+    "title": "Advance an Opportunity stage",
+    "level": "Beginner",
+    "track": "Sales Cloud",
+    "xp": 50,
+    "task": {
+      "action": "updateRecord",
+      "object": "Opportunity",
+      "find": {
+        "Name": "Acme Solar Upgrade"
+      },
+      "updates": {
+        "StageName": "Qualification"
+      }
+    },
+    "concept": "Sales stages show how close a deal is to closing.",
+    "steps": [
+      "Choose Update Record.",
+      "Find the opportunity named Acme Solar Upgrade.",
+      "Set StageName to Qualification."
+    ],
+    "hint": "The find field is Name. The update field is StageName.",
+    "demo": "{\"StageName\":\"Qualification\"}"
+  },
+  {
+    "id": "SF-013",
+    "title": "Close a Case",
+    "level": "Beginner",
+    "track": "Service Cloud",
+    "xp": 50,
+    "task": {
+      "action": "updateRecord",
+      "object": "Case",
+      "find": {
+        "Subject": "Login issue"
+      },
+      "updates": {
+        "Status": "Closed"
+      }
+    },
+    "concept": "Closing cases signals that the customer issue has been resolved.",
+    "steps": [
+      "Choose Update Record.",
+      "Find Case by Subject Login issue.",
+      "Set Status to Closed."
+    ],
+    "hint": "Closed must be the exact status value for this lesson.",
+    "demo": "{\"Status\":\"Closed\"}"
+  },
+  {
+    "id": "SF-014",
+    "title": "Complete a Task",
+    "level": "Beginner",
+    "track": "Productivity",
+    "xp": 50,
+    "task": {
+      "action": "updateRecord",
+      "object": "Task",
+      "find": {
+        "Subject": "Call Maya about proposal"
+      },
+      "updates": {
+        "Status": "Completed"
+      }
+    },
+    "concept": "Completed tasks help teams see what follow-up is done.",
+    "steps": [
+      "Update the Task record.",
+      "Find by Subject.",
+      "Set Status to Completed."
+    ],
+    "hint": "Task Status should be Completed, not Done.",
+    "demo": "{\"Status\":\"Completed\"}"
+  },
+  {
+    "id": "SF-015",
+    "title": "Qualify a Lead",
+    "level": "Beginner",
+    "track": "CRM Foundations",
+    "xp": 50,
+    "task": {
+      "action": "updateRecord",
+      "object": "Lead",
+      "find": {
+        "LastName": "Cole"
+      },
+      "updates": {
+        "Status": "Working - Contacted"
+      }
+    },
+    "concept": "Lead qualification begins when sales starts active contact.",
+    "steps": [
+      "Update the Lead.",
+      "Find LastName Cole.",
+      "Set Status to Working - Contacted."
+    ],
+    "hint": "Use the exact Status string from the lesson.",
+    "demo": "{\"Status\":\"Working - Contacted\"}"
+  },
+  {
+    "id": "SF-016",
+    "title": "Create a nonprofit Account",
+    "level": "Beginner",
+    "track": "CRM Foundations",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Account",
+      "fields": {
+        "Name": "Future Path Youth Center",
+        "Industry": "Nonprofit"
+      }
+    },
+    "concept": "Salesforce can model nonprofits, schools, agencies, and businesses.",
+    "steps": [
+      "Create an Account.",
+      "Set Name to Future Path Youth Center.",
+      "Set Industry to Nonprofit."
+    ],
+    "hint": "Industry helps segment organizations.",
+    "demo": "{\"Name\":\"Future Path Youth Center\",\"Industry\":\"Nonprofit\"}"
+  },
+  {
+    "id": "SF-017",
+    "title": "Create an education Contact",
+    "level": "Beginner",
+    "track": "CRM Foundations",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Contact",
+      "fields": {
+        "FirstName": "Joann",
+        "LastName": "Means",
+        "AccountName": "Future Path Youth Center",
+        "Title": "Workforce Partner"
+      }
+    },
+    "concept": "Contact fields can store role details for relationship building.",
+    "steps": [
+      "Create a Contact.",
+      "Add FirstName, LastName, AccountName, and Title.",
+      "Run the action."
+    ],
+    "hint": "Title is useful for knowing a contact's role.",
+    "demo": "{\"FirstName\":\"Joann\",\"LastName\":\"Means\",\"AccountName\":\"Future Path Youth Center\",\"Title\":\"Workforce Partner\"}"
+  },
+  {
+    "id": "SF-018",
+    "title": "Open a service escalation Case",
+    "level": "Beginner",
+    "track": "Service Cloud",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Case",
+      "fields": {
+        "Subject": "Urgent portal outage",
+        "Status": "New",
+        "Priority": "Critical",
+        "Origin": "Web"
+      }
+    },
+    "concept": "Priority helps support teams triage work.",
+    "steps": [
+      "Create a Case.",
+      "Use Priority Critical.",
+      "Set Origin to Web."
+    ],
+    "hint": "Critical is stronger than High in this simulator.",
+    "demo": "{\"Subject\":\"Urgent portal outage\",\"Status\":\"New\",\"Priority\":\"Critical\",\"Origin\":\"Web\"}"
+  },
+  {
+    "id": "SF-019",
+    "title": "Create a high-value Opportunity",
+    "level": "Beginner",
+    "track": "Sales Cloud",
+    "xp": 50,
+    "task": {
+      "action": "createRecord",
+      "object": "Opportunity",
+      "fields": {
+        "Name": "Future Path CRM Launch",
+        "StageName": "Proposal/Price Quote",
+        "Amount": 75000,
+        "CloseDate": "2026-09-15"
+      }
+    },
+    "concept": "Opportunity Amount drives pipeline forecasting.",
+    "steps": [
+      "Create an Opportunity.",
+      "Set Amount to 75000.",
+      "Use StageName Proposal/Price Quote."
+    ],
+    "hint": "Keep Amount as a number, not a quoted string.",
+    "demo": "{\"Name\":\"Future Path CRM Launch\",\"StageName\":\"Proposal/Price Quote\",\"Amount\":75000,\"CloseDate\":\"2026-09-15\"}"
+  },
+  {
+    "id": "SF-020",
+    "title": "Import two Accounts",
+    "level": "Beginner",
+    "track": "Data Management",
+    "xp": 50,
+    "task": {
+      "action": "importRecords",
+      "object": "Account",
+      "records": [
+        {
+          "Name": "North Star Logistics"
+        },
+        {
+          "Name": "Blue River Health"
+        }
+      ]
+    },
+    "concept": "Data import is common when loading existing customer lists.",
+    "steps": [
+      "Choose Import JSON Records.",
+      "Select Account.",
+      "Paste an array with two account objects.",
+      "Run the action."
+    ],
+    "hint": "Your JSON must be an array for import, not one object.",
+    "demo": "[{\"Name\":\"North Star Logistics\"},{\"Name\":\"Blue River Health\"}]"
+  },
+  {
+    "id": "SF-021",
+    "title": "Create a custom Project object",
+    "level": "Intermediate",
+    "track": "Data Modeling",
+    "xp": 75,
+    "task": {
+      "action": "createObject",
+      "apiName": "Project__c",
+      "label": "Project"
+    },
+    "concept": "Custom objects store information that does not fit standard Salesforce objects.",
+    "steps": [
+      "Open Setup.",
+      "Choose Create Object.",
+      "Set API Name to Project__c.",
+      "Set Label to Project.",
+      "Run Setup Action."
+    ],
+    "hint": "Custom object API names usually end with __c.",
+    "demo": "{\"apiName\":\"Project__c\",\"label\":\"Project\"}"
+  },
+  {
+    "id": "SF-022",
+    "title": "Create a Project Status field",
+    "level": "Intermediate",
+    "track": "Data Modeling",
+    "xp": 75,
+    "task": {
+      "action": "createField",
+      "object": "Project__c",
+      "fieldName": "Status__c",
+      "type": "Picklist"
+    },
+    "concept": "Fields define what data each object can store.",
+    "steps": [
+      "Choose Create Field.",
+      "Target Project__c.",
+      "Name the field Status__c.",
+      "Use Picklist as the type."
+    ],
+    "hint": "Use field API name Status__c and type Picklist.",
+    "demo": "{\"label\":\"Status\",\"type\":\"Picklist\",\"values\":[\"Planned\",\"Active\",\"Complete\"]}"
+  },
+  {
+    "id": "SF-023",
+    "title": "Create a Project Budget field",
+    "level": "Intermediate",
+    "track": "Data Modeling",
+    "xp": 75,
+    "task": {
+      "action": "createField",
+      "object": "Project__c",
+      "fieldName": "Budget__c",
+      "type": "Currency"
+    },
+    "concept": "Currency fields are used for money values.",
+    "steps": [
+      "Choose Create Field.",
+      "Target Project__c.",
+      "Name it Budget__c.",
+      "Set type Currency."
+    ],
+    "hint": "Use Currency, not Number, for a budget field.",
+    "demo": "{\"label\":\"Budget\",\"type\":\"Currency\"}"
+  },
+  {
+    "id": "SF-024",
+    "title": "Create a Project Due Date field",
+    "level": "Intermediate",
+    "track": "Data Modeling",
+    "xp": 75,
+    "task": {
+      "action": "createField",
+      "object": "Project__c",
+      "fieldName": "Due_Date__c",
+      "type": "Date"
+    },
+    "concept": "Date fields help track deadlines and milestones.",
+    "steps": [
+      "Create a field on Project__c.",
+      "Use Due_Date__c.",
+      "Set type Date."
+    ],
+    "hint": "Field names with spaces use underscores in API names.",
+    "demo": "{\"label\":\"Due Date\",\"type\":\"Date\"}"
+  },
+  {
+    "id": "SF-025",
+    "title": "Create a Project Account relationship",
+    "level": "Intermediate",
+    "track": "Data Modeling",
+    "xp": 75,
+    "task": {
+      "action": "createRelationship",
+      "childObject": "Project__c",
+      "parentObject": "Account",
+      "fieldName": "Account__c"
+    },
+    "concept": "Relationships connect related records across objects.",
+    "steps": [
+      "Choose Create Relationship.",
+      "Target Project__c as the child.",
+      "Set parentObject to Account in the JSON.",
+      "Use Account__c as the relationship field."
+    ],
+    "hint": "The relationship should link Project__c to Account.",
+    "demo": "{\"parentObject\":\"Account\",\"type\":\"Lookup\"}"
+  },
+  {
+    "id": "SF-026",
+    "title": "Add Customer Tier to Account",
+    "level": "Intermediate",
+    "track": "Data Modeling",
+    "xp": 75,
+    "task": {
+      "action": "createField",
+      "object": "Account",
+      "fieldName": "Customer_Tier__c",
+      "type": "Picklist"
+    },
+    "concept": "Picklist fields standardize choices for cleaner reporting.",
+    "steps": [
+      "Create Field.",
+      "Target Account.",
+      "Use Customer_Tier__c.",
+      "Set type Picklist."
+    ],
+    "hint": "Picklist values can be Bronze, Silver, and Gold.",
+    "demo": "{\"label\":\"Customer Tier\",\"type\":\"Picklist\",\"values\":[\"Bronze\",\"Silver\",\"Gold\"]}"
+  },
+  {
+    "id": "SF-027",
+    "title": "Add SLA Level to Case",
+    "level": "Intermediate",
+    "track": "Service Cloud",
+    "xp": 75,
+    "task": {
+      "action": "createField",
+      "object": "Case",
+      "fieldName": "SLA_Level__c",
+      "type": "Picklist"
+    },
+    "concept": "Service teams use SLA fields to prioritize time-sensitive support.",
+    "steps": [
+      "Create a Case field.",
+      "Name it SLA_Level__c.",
+      "Set type Picklist."
+    ],
+    "hint": "SLA values might be Standard, Priority, and Urgent.",
+    "demo": "{\"label\":\"SLA Level\",\"type\":\"Picklist\",\"values\":[\"Standard\",\"Priority\",\"Urgent\"]}"
+  },
+  {
+    "id": "SF-028",
+    "title": "Add Lead Source Score",
+    "level": "Intermediate",
+    "track": "Data Modeling",
+    "xp": 75,
+    "task": {
+      "action": "createField",
+      "object": "Lead",
+      "fieldName": "Source_Score__c",
+      "type": "Number"
+    },
+    "concept": "Scoring fields help qualify leads by quality.",
+    "steps": [
+      "Create a Lead field.",
+      "Use Source_Score__c.",
+      "Set type Number."
+    ],
+    "hint": "Score fields should be Number fields.",
+    "demo": "{\"label\":\"Source Score\",\"type\":\"Number\"}"
+  },
+  {
+    "id": "SF-029",
+    "title": "Create Opportunity Discount field",
+    "level": "Intermediate",
+    "track": "Sales Cloud",
+    "xp": 75,
+    "task": {
+      "action": "createField",
+      "object": "Opportunity",
+      "fieldName": "Discount_Percent__c",
+      "type": "Percent"
+    },
+    "concept": "Percent fields track discounts, completion, or probability-style values.",
+    "steps": [
+      "Create an Opportunity field.",
+      "Name it Discount_Percent__c.",
+      "Set type Percent."
+    ],
+    "hint": "Use Percent as the field type.",
+    "demo": "{\"label\":\"Discount Percent\",\"type\":\"Percent\"}"
+  },
+  {
+    "id": "SF-030",
+    "title": "Create a blank Account Name validation",
+    "level": "Intermediate",
+    "track": "Data Quality",
+    "xp": 75,
+    "task": {
+      "action": "createValidationRule",
+      "object": "Account",
+      "name": "Account_Name_Required",
+      "formulaContains": "ISBLANK(Name)"
+    },
+    "concept": "Validation rules prevent bad data from entering the org.",
+    "steps": [
+      "Choose Create Validation Rule.",
+      "Target Account.",
+      "Name it Account_Name_Required.",
+      "Use formula ISBLANK(Name).",
+      "Add an error message."
+    ],
+    "hint": "The formula should include ISBLANK(Name).",
+    "demo": "{\"formula\":\"ISBLANK(Name)\",\"errorMessage\":\"Account Name is required.\"}"
+  },
+  {
+    "id": "SF-031",
+    "title": "Validate positive Opportunity Amount",
+    "level": "Intermediate",
+    "track": "Data Quality",
+    "xp": 75,
+    "task": {
+      "action": "createValidationRule",
+      "object": "Opportunity",
+      "name": "Positive_Amount_Required",
+      "formulaContains": "Amount <= 0"
+    },
+    "concept": "Revenue reports depend on clean opportunity Amount values.",
+    "steps": [
+      "Create an Opportunity validation rule.",
+      "Name it Positive_Amount_Required.",
+      "Use formula Amount <= 0."
+    ],
+    "hint": "A validation rule fires when the formula evaluates to true.",
+    "demo": "{\"formula\":\"Amount <= 0\",\"errorMessage\":\"Amount must be greater than zero.\"}"
+  },
+  {
+    "id": "SF-032",
+    "title": "Create Case escalation validation",
+    "level": "Intermediate",
+    "track": "Service Cloud",
+    "xp": 75,
+    "task": {
+      "action": "createValidationRule",
+      "object": "Case",
+      "name": "Critical_Case_Needs_Origin",
+      "formulaContains": "ISBLANK(Origin)"
+    },
+    "concept": "Support processes need enough data to route cases correctly.",
+    "steps": [
+      "Create a Case validation rule.",
+      "Name it Critical_Case_Needs_Origin.",
+      "Include ISBLANK(Origin) in the formula."
+    ],
+    "hint": "The simulator looks for the formula text ISBLANK(Origin).",
+    "demo": "{\"formula\":\"ISBLANK(Origin)\",\"errorMessage\":\"Origin is required for support routing.\"}"
+  },
+  {
+    "id": "SF-033",
+    "title": "Create Sales Manager permission set",
+    "level": "Intermediate",
+    "track": "Security",
+    "xp": 75,
+    "task": {
+      "action": "createPermissionSet",
+      "name": "Sales_Manager_Access",
+      "object": "Opportunity",
+      "permission": "Edit"
+    },
+    "concept": "Permission sets grant extra access without changing a user's profile.",
+    "steps": [
+      "Choose Create Permission Set.",
+      "Name it Sales_Manager_Access.",
+      "Set object to Opportunity.",
+      "Set permission to Edit."
+    ],
+    "hint": "Use JSON to define object and permission.",
+    "demo": "{\"object\":\"Opportunity\",\"permission\":\"Edit\"}"
+  },
+  {
+    "id": "SF-034",
+    "title": "Create Service Agent permission set",
+    "level": "Intermediate",
+    "track": "Security",
+    "xp": 75,
+    "task": {
+      "action": "createPermissionSet",
+      "name": "Service_Agent_Access",
+      "object": "Case",
+      "permission": "Edit"
+    },
+    "concept": "Service agents need the right object access to update cases.",
+    "steps": [
+      "Create a permission set.",
+      "Name it Service_Agent_Access.",
+      "Grant Edit on Case."
+    ],
+    "hint": "Permission set JSON should include object Case and permission Edit.",
+    "demo": "{\"object\":\"Case\",\"permission\":\"Edit\"}"
+  },
+  {
+    "id": "SF-035",
+    "title": "Create a read-only reporting permission set",
+    "level": "Intermediate",
+    "track": "Security",
+    "xp": 75,
+    "task": {
+      "action": "createPermissionSet",
+      "name": "Reporting_Read_Only",
+      "object": "Report",
+      "permission": "Read"
+    },
+    "concept": "Read-only permissions allow users to view data without changing it.",
+    "steps": [
+      "Create a permission set.",
+      "Name it Reporting_Read_Only.",
+      "Object should be Report.",
+      "Permission should be Read."
+    ],
+    "hint": "Keep permission at Read, not Edit.",
+    "demo": "{\"object\":\"Report\",\"permission\":\"Read\"}"
+  },
+  {
+    "id": "SF-036",
+    "title": "Create a new Salesforce user",
+    "level": "Intermediate",
+    "track": "Security",
+    "xp": 75,
+    "task": {
+      "action": "createUser",
+      "name": "Avery Stone",
+      "profile": "Standard User"
+    },
+    "concept": "Users represent people who log into the Salesforce org.",
+    "steps": [
+      "Choose Create User.",
+      "Name the user Avery Stone.",
+      "Set profile to Standard User.",
+      "Run Setup Action."
+    ],
+    "hint": "Put profile in the JSON config.",
+    "demo": "{\"profile\":\"Standard User\",\"role\":\"Sales Rep\",\"active\":true}"
+  },
+  {
+    "id": "SF-037",
+    "title": "Create a Service Manager user",
+    "level": "Intermediate",
+    "track": "Security",
+    "xp": 75,
+    "task": {
+      "action": "createUser",
+      "name": "Imani Reed",
+      "profile": "System Administrator"
+    },
+    "concept": "Admin users can configure more of the org than standard users.",
+    "steps": [
+      "Create a user named Imani Reed.",
+      "Use profile System Administrator.",
+      "Run Setup Action."
+    ],
+    "hint": "The profile must match System Administrator exactly.",
+    "demo": "{\"profile\":\"System Administrator\",\"role\":\"Service Manager\",\"active\":true}"
+  },
+  {
+    "id": "SF-038",
+    "title": "Create a Gold Account record type",
+    "level": "Intermediate",
+    "track": "Data Modeling",
+    "xp": 75,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "RecordType",
+      "name": "Gold_Customer",
+      "object": "Account"
+    },
+    "concept": "Record types support different business processes on the same object.",
+    "steps": [
+      "Choose Create Admin Asset.",
+      "Set Name to Gold_Customer.",
+      "Use Asset Kind RecordType.",
+      "Set object to Account in JSON."
+    ],
+    "hint": "RecordType is the asset kind.",
+    "demo": "{\"object\":\"Account\",\"description\":\"Premium customer process\"}"
+  },
+  {
+    "id": "SF-039",
+    "title": "Add Customer Tier to page layout",
+    "level": "Intermediate",
+    "track": "UX Customization",
+    "xp": 75,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "PageLayoutField",
+      "name": "Account.Customer_Tier__c",
+      "object": "Account"
+    },
+    "concept": "Page layouts control which fields users see on record pages.",
+    "steps": [
+      "Create an Admin Asset.",
+      "Asset Kind should be PageLayoutField.",
+      "Name it Account.Customer_Tier__c.",
+      "Object should be Account."
+    ],
+    "hint": "The simulator stores layout fields as metadata assets.",
+    "demo": "{\"object\":\"Account\",\"section\":\"Customer Details\"}"
+  },
+  {
+    "id": "SF-040",
+    "title": "Create an Account sharing rule",
+    "level": "Intermediate",
+    "track": "Security",
+    "xp": 75,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "SharingRule",
+      "name": "Share_Nonprofit_Accounts",
+      "object": "Account"
+    },
+    "concept": "Sharing rules open record access beyond organization-wide defaults.",
+    "steps": [
+      "Create an Admin Asset.",
+      "Kind SharingRule.",
+      "Name Share_Nonprofit_Accounts.",
+      "Object Account."
+    ],
+    "hint": "Use the Admin Asset action for sharing rules.",
+    "demo": "{\"object\":\"Account\",\"criteria\":\"Industry = Nonprofit\",\"access\":\"Read\"}"
+  },
+  {
+    "id": "SF-041",
+    "title": "Create a duplicate rule for Contacts",
+    "level": "Intermediate",
+    "track": "Data Quality",
+    "xp": 75,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "DuplicateRule",
+      "name": "Contact_Email_Duplicate",
+      "object": "Contact"
+    },
+    "concept": "Duplicate rules help prevent duplicate customer records.",
+    "steps": [
+      "Create an Admin Asset.",
+      "Kind DuplicateRule.",
+      "Name Contact_Email_Duplicate.",
+      "Object Contact."
+    ],
+    "hint": "DuplicateRule should be the kind and Contact should be the object.",
+    "demo": "{\"object\":\"Contact\",\"matchField\":\"Email\",\"action\":\"Block\"}"
+  },
+  {
+    "id": "SF-042",
+    "title": "Create a Case queue",
+    "level": "Intermediate",
+    "track": "Service Cloud",
+    "xp": 75,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "Queue",
+      "name": "Tier_2_Support",
+      "object": "Case"
+    },
+    "concept": "Queues hold work items until the right team member accepts them.",
+    "steps": [
+      "Create an Admin Asset.",
+      "Kind Queue.",
+      "Name Tier_2_Support.",
+      "Object Case."
+    ],
+    "hint": "Queues are often used for Cases and Leads.",
+    "demo": "{\"object\":\"Case\",\"members\":[\"Service Agents\"]}"
+  },
+  {
+    "id": "SF-043",
+    "title": "Create a Lead assignment rule",
+    "level": "Intermediate",
+    "track": "Sales Cloud",
+    "xp": 75,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "AssignmentRule",
+      "name": "Assign_Web_Leads",
+      "object": "Lead"
+    },
+    "concept": "Assignment rules route incoming records to the right owner or queue.",
+    "steps": [
+      "Create an Admin Asset.",
+      "Kind AssignmentRule.",
+      "Name Assign_Web_Leads.",
+      "Object Lead."
+    ],
+    "hint": "This is metadata, not a regular Lead record.",
+    "demo": "{\"object\":\"Lead\",\"criteria\":\"LeadSource = Web\",\"assignTo\":\"Inside Sales\"}"
+  },
+  {
+    "id": "SF-044",
+    "title": "Create a Lightning app",
+    "level": "Intermediate",
+    "track": "UX Customization",
+    "xp": 75,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "LightningApp",
+      "name": "Salesforce_Quest_App",
+      "object": "App"
+    },
+    "concept": "Lightning apps group tabs and tools for a specific user workflow.",
+    "steps": [
+      "Create an Admin Asset.",
+      "Kind LightningApp.",
+      "Name Salesforce_Quest_App.",
+      "Object App."
+    ],
+    "hint": "Use Asset Kind LightningApp.",
+    "demo": "{\"object\":\"App\",\"tabs\":[\"Account\",\"Contact\",\"Opportunity\",\"Report\"]}"
+  },
+  {
+    "id": "SF-045",
+    "title": "Create a Path for Opportunity",
+    "level": "Intermediate",
+    "track": "Sales Cloud",
+    "xp": 75,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "Path",
+      "name": "Opportunity_Sales_Path",
+      "object": "Opportunity"
+    },
+    "concept": "Path gives users guidance at each stage of a business process.",
+    "steps": [
+      "Create an Admin Asset.",
+      "Kind Path.",
+      "Name Opportunity_Sales_Path.",
+      "Object Opportunity."
+    ],
+    "hint": "A Path is metadata tied to an object.",
+    "demo": "{\"object\":\"Opportunity\",\"stages\":[\"Prospecting\",\"Qualification\",\"Closed Won\"]}"
+  },
+  {
+    "id": "SF-046",
+    "title": "Build Accounts by Industry report",
+    "level": "Intermediate",
+    "track": "Reports & Dashboards",
+    "xp": 75,
+    "task": {
+      "action": "createReport",
+      "name": "Accounts by Industry",
+      "object": "Account",
+      "groupBy": "Industry"
+    },
+    "concept": "Reports turn CRM data into useful lists, summaries, and insights.",
+    "steps": [
+      "Open Reports.",
+      "Name the report Accounts by Industry.",
+      "Object Account.",
+      "Group By Industry.",
+      "Create Report."
+    ],
+    "hint": "Group by Industry to summarize accounts.",
+    "demo": "Name: Accounts by Industry, Object: Account, Group By: Industry"
+  },
+  {
+    "id": "SF-047",
+    "title": "Build Opportunities by Stage report",
+    "level": "Intermediate",
+    "track": "Reports & Dashboards",
+    "xp": 75,
+    "task": {
+      "action": "createReport",
+      "name": "Opportunities by Stage",
+      "object": "Opportunity",
+      "groupBy": "StageName"
+    },
+    "concept": "Pipeline reports group deals by stage.",
+    "steps": [
+      "Create a report named Opportunities by Stage.",
+      "Object Opportunity.",
+      "Group By StageName."
+    ],
+    "hint": "StageName is the field to group pipeline records.",
+    "demo": "Name: Opportunities by Stage, Object: Opportunity, Group By: StageName"
+  },
+  {
+    "id": "SF-048",
+    "title": "Build Cases by Priority report",
+    "level": "Intermediate",
+    "track": "Reports & Dashboards",
+    "xp": 75,
+    "task": {
+      "action": "createReport",
+      "name": "Cases by Priority",
+      "object": "Case",
+      "groupBy": "Priority"
+    },
+    "concept": "Support leaders use case reports to watch workload and urgency.",
+    "steps": [
+      "Create a report named Cases by Priority.",
+      "Object Case.",
+      "Group By Priority."
+    ],
+    "hint": "Priority is the grouping field.",
+    "demo": "Name: Cases by Priority, Object: Case, Group By: Priority"
+  },
+  {
+    "id": "SF-049",
+    "title": "Build Leads by Status report",
+    "level": "Intermediate",
+    "track": "Reports & Dashboards",
+    "xp": 75,
+    "task": {
+      "action": "createReport",
+      "name": "Leads by Status",
+      "object": "Lead",
+      "groupBy": "Status"
+    },
+    "concept": "Lead status reports show how many prospects sit in each qualification step.",
+    "steps": [
+      "Create report Leads by Status.",
+      "Object Lead.",
+      "Group by Status."
+    ],
+    "hint": "Use the Lead object and Status field.",
+    "demo": "Name: Leads by Status, Object: Lead, Group By: Status"
+  },
+  {
+    "id": "SF-050",
+    "title": "Build Campaign response report",
+    "level": "Intermediate",
+    "track": "Reports & Dashboards",
+    "xp": 75,
+    "task": {
+      "action": "createReport",
+      "name": "Campaign Members by Status",
+      "object": "CampaignMember",
+      "groupBy": "Status"
+    },
+    "concept": "Campaign member reports show marketing engagement.",
+    "steps": [
+      "Create report Campaign Members by Status.",
+      "Object CampaignMember.",
+      "Group By Status."
+    ],
+    "hint": "The object is CampaignMember, not Campaign.",
+    "demo": "Name: Campaign Members by Status, Object: CampaignMember, Group By: Status"
+  },
+  {
+    "id": "SF-051",
+    "title": "Build Tasks by Status report",
+    "level": "Intermediate",
+    "track": "Reports & Dashboards",
+    "xp": 75,
+    "task": {
+      "action": "createReport",
+      "name": "Tasks by Status",
+      "object": "Task",
+      "groupBy": "Status"
+    },
+    "concept": "Task reports help teams track activity completion.",
+    "steps": [
+      "Create report Tasks by Status.",
+      "Object Task.",
+      "Group By Status."
+    ],
+    "hint": "Group by the task Status field.",
+    "demo": "Name: Tasks by Status, Object: Task, Group By: Status"
+  },
+  {
+    "id": "SF-052",
+    "title": "Build Products by Active report",
+    "level": "Intermediate",
+    "track": "Reports & Dashboards",
+    "xp": 75,
+    "task": {
+      "action": "createReport",
+      "name": "Products by Active Status",
+      "object": "Product2",
+      "groupBy": "IsActive"
+    },
+    "concept": "Product reports help keep the catalog clean.",
+    "steps": [
+      "Create report Products by Active Status.",
+      "Object Product2.",
+      "Group By IsActive."
+    ],
+    "hint": "The product object is Product2 in Salesforce naming.",
+    "demo": "Name: Products by Active Status, Object: Product2, Group By: IsActive"
+  },
+  {
+    "id": "SF-053",
+    "title": "Build Contracts by Status report",
+    "level": "Intermediate",
+    "track": "Reports & Dashboards",
+    "xp": 75,
+    "task": {
+      "action": "createReport",
+      "name": "Contracts by Status",
+      "object": "Contract",
+      "groupBy": "Status"
+    },
+    "concept": "Contract reports help track drafts, activated agreements, and renewals.",
+    "steps": [
+      "Create report Contracts by Status.",
+      "Object Contract.",
+      "Group By Status."
+    ],
+    "hint": "Status is the group field.",
+    "demo": "Name: Contracts by Status, Object: Contract, Group By: Status"
+  },
+  {
+    "id": "SF-054",
+    "title": "Create Sales Pipeline dashboard",
+    "level": "Intermediate",
+    "track": "Reports & Dashboards",
+    "xp": 75,
+    "task": {
+      "action": "createDashboard",
+      "name": "Sales Pipeline Dashboard",
+      "reportName": "Opportunities by Stage"
+    },
+    "concept": "Dashboards display report data visually for leaders.",
+    "steps": [
+      "Create the Opportunities by Stage report first if needed.",
+      "Click Create Dashboard From Report.",
+      "Name dashboard Sales Pipeline Dashboard."
+    ],
+    "hint": "The dashboard should be based on Opportunities by Stage.",
+    "demo": "Dashboard Name: Sales Pipeline Dashboard"
+  },
+  {
+    "id": "SF-055",
+    "title": "Create Service Health dashboard",
+    "level": "Intermediate",
+    "track": "Reports & Dashboards",
+    "xp": 75,
+    "task": {
+      "action": "createDashboard",
+      "name": "Service Health Dashboard",
+      "reportName": "Cases by Priority"
+    },
+    "concept": "Service dashboards reveal where urgent support work is stacking up.",
+    "steps": [
+      "Create the Cases by Priority report if needed.",
+      "Create a dashboard named Service Health Dashboard."
+    ],
+    "hint": "Use report Cases by Priority.",
+    "demo": "Dashboard Name: Service Health Dashboard"
+  },
+  {
+    "id": "SF-056",
+    "title": "Create Marketing Performance dashboard",
+    "level": "Intermediate",
+    "track": "Reports & Dashboards",
+    "xp": 75,
+    "task": {
+      "action": "createDashboard",
+      "name": "Marketing Performance Dashboard",
+      "reportName": "Campaign Members by Status"
+    },
+    "concept": "Marketing dashboards show campaign engagement and follow-up status.",
+    "steps": [
+      "Create Campaign Members by Status report.",
+      "Create dashboard Marketing Performance Dashboard."
+    ],
+    "hint": "Use the campaign member report as the dashboard source.",
+    "demo": "Dashboard Name: Marketing Performance Dashboard"
+  },
+  {
+    "id": "SF-057",
+    "title": "Create Activity Tracker dashboard",
+    "level": "Intermediate",
+    "track": "Reports & Dashboards",
+    "xp": 75,
+    "task": {
+      "action": "createDashboard",
+      "name": "Activity Tracker Dashboard",
+      "reportName": "Tasks by Status"
+    },
+    "concept": "Activity dashboards support team accountability.",
+    "steps": [
+      "Create Tasks by Status report.",
+      "Create dashboard Activity Tracker Dashboard."
+    ],
+    "hint": "Use report Tasks by Status.",
+    "demo": "Dashboard Name: Activity Tracker Dashboard"
+  },
+  {
+    "id": "SF-058",
+    "title": "Build Account tier report",
+    "level": "Advanced",
+    "track": "Reports & Dashboards",
+    "xp": 100,
+    "task": {
+      "action": "createReport",
+      "name": "Accounts by Customer Tier",
+      "object": "Account",
+      "groupBy": "Customer_Tier__c"
+    },
+    "concept": "Custom fields become valuable when they support segmentation and reporting.",
+    "steps": [
+      "Create or confirm Customer_Tier__c exists.",
+      "Create a report named Accounts by Customer Tier.",
+      "Object Account.",
+      "Group By Customer_Tier__c."
+    ],
+    "hint": "Group using the custom field API name.",
+    "demo": "Name: Accounts by Customer Tier, Object: Account, Group By: Customer_Tier__c"
+  },
+  {
+    "id": "SF-059",
+    "title": "Build Project status report",
+    "level": "Advanced",
+    "track": "Reports & Dashboards",
+    "xp": 100,
+    "task": {
+      "action": "createReport",
+      "name": "Projects by Status",
+      "object": "Project__c",
+      "groupBy": "Status__c"
+    },
+    "concept": "Custom object reports help teams manage custom business processes.",
+    "steps": [
+      "Create Project__c if needed.",
+      "Create report Projects by Status.",
+      "Group By Status__c."
+    ],
+    "hint": "Project__c and Status__c must exist in the simulator state.",
+    "demo": "Name: Projects by Status, Object: Project__c, Group By: Status__c"
+  },
+  {
+    "id": "SF-060",
+    "title": "Create Executive Overview dashboard",
+    "level": "Advanced",
+    "track": "Reports & Dashboards",
+    "xp": 100,
+    "task": {
+      "action": "createDashboard",
+      "name": "Executive Overview",
+      "reportName": "Accounts by Industry"
+    },
+    "concept": "Executive dashboards combine important reports into a quick leadership view.",
+    "steps": [
+      "Create Accounts by Industry first if needed.",
+      "Create dashboard Executive Overview from that report."
+    ],
+    "hint": "Use Accounts by Industry as the report source.",
+    "demo": "Dashboard Name: Executive Overview"
+  },
+  {
+    "id": "SF-061",
+    "title": "Create flow to mark high-value opportunities",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Mark High Value Opportunities",
+      "object": "Opportunity",
+      "trigger": "afterCreate",
+      "updateField": "Priority__c",
+      "updateValue": "High"
+    },
+    "concept": "Record-triggered flows automate repeatable work when records are created or changed.",
+    "steps": [
+      "Open Automation.",
+      "Name the flow Mark High Value Opportunities.",
+      "Object Opportunity.",
+      "Trigger After Create.",
+      "Condition Amount > 50000.",
+      "Update Priority__c to High."
+    ],
+    "hint": "Use update field Priority__c and update value High.",
+    "demo": "Flow Name: Mark High Value Opportunities; Object: Opportunity; Update: Priority__c = High"
+  },
+  {
+    "id": "SF-062",
+    "title": "Create flow to set new case SLA",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Set New Case SLA",
+      "object": "Case",
+      "trigger": "afterCreate",
+      "updateField": "SLA_Level__c",
+      "updateValue": "Priority"
+    },
+    "concept": "Flows can standardize service fields as soon as cases arrive.",
+    "steps": [
+      "Create a flow named Set New Case SLA.",
+      "Object Case.",
+      "Trigger After Create.",
+      "Update SLA_Level__c to Priority."
+    ],
+    "hint": "Make sure the update value is Priority.",
+    "demo": "Flow Name: Set New Case SLA; Object: Case; Update: SLA_Level__c = Priority"
+  },
+  {
+    "id": "SF-063",
+    "title": "Create flow to score web leads",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Score Web Leads",
+      "object": "Lead",
+      "trigger": "afterCreate",
+      "updateField": "Source_Score__c",
+      "updateValue": "10"
+    },
+    "concept": "Automation can apply lead scoring logic consistently.",
+    "steps": [
+      "Create a flow named Score Web Leads.",
+      "Object Lead.",
+      "Trigger After Create.",
+      "Condition LeadSource = Web.",
+      "Update Source_Score__c to 10."
+    ],
+    "hint": "The update value can be text 10 in this simulator.",
+    "demo": "Flow Name: Score Web Leads; Object: Lead; Update: Source_Score__c = 10"
+  },
+  {
+    "id": "SF-064",
+    "title": "Create flow to activate new projects",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Activate New Projects",
+      "object": "Project__c",
+      "trigger": "afterCreate",
+      "updateField": "Status__c",
+      "updateValue": "Active"
+    },
+    "concept": "Custom object automation supports custom workflows.",
+    "steps": [
+      "Create a flow named Activate New Projects.",
+      "Object Project__c.",
+      "Trigger After Create.",
+      "Update Status__c to Active."
+    ],
+    "hint": "Project__c can be created in Setup first.",
+    "demo": "Flow Name: Activate New Projects; Object: Project__c; Update: Status__c = Active"
+  },
+  {
+    "id": "SF-065",
+    "title": "Create flow for urgent case flag",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Flag Urgent Cases",
+      "object": "Case",
+      "trigger": "beforeSave",
+      "updateField": "Urgent__c",
+      "updateValue": "true"
+    },
+    "concept": "Before-save flows can update fields before a record is committed.",
+    "steps": [
+      "Name the flow Flag Urgent Cases.",
+      "Object Case.",
+      "Trigger Before Save.",
+      "Condition Priority = Critical.",
+      "Update Urgent__c to true."
+    ],
+    "hint": "Use trigger Before Save in the dropdown.",
+    "demo": "Flow Name: Flag Urgent Cases; Trigger: Before Save; Update: Urgent__c = true"
+  },
+  {
+    "id": "SF-066",
+    "title": "Create flow for gold account onboarding",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Gold Account Onboarding",
+      "object": "Account",
+      "trigger": "afterCreate",
+      "updateField": "Onboarding_Status__c",
+      "updateValue": "Started"
+    },
+    "concept": "Flows can launch onboarding steps when important records are created.",
+    "steps": [
+      "Create flow Gold Account Onboarding.",
+      "Object Account.",
+      "Trigger After Create.",
+      "Update Onboarding_Status__c to Started."
+    ],
+    "hint": "Use Onboarding_Status__c exactly.",
+    "demo": "Flow Name: Gold Account Onboarding; Object: Account; Update: Onboarding_Status__c = Started"
+  },
+  {
+    "id": "SF-067",
+    "title": "Create flow for closed-won follow-up",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Closed Won Follow Up",
+      "object": "Opportunity",
+      "trigger": "afterCreate",
+      "updateField": "Next_Step__c",
+      "updateValue": "Schedule kickoff"
+    },
+    "concept": "Sales automation can create consistent handoff behavior after deals close.",
+    "steps": [
+      "Create flow Closed Won Follow Up.",
+      "Object Opportunity.",
+      "Trigger After Create.",
+      "Update Next_Step__c to Schedule kickoff."
+    ],
+    "hint": "The simulator validates the flow definition, not a real Salesforce deployment.",
+    "demo": "Flow Name: Closed Won Follow Up; Update: Next_Step__c = Schedule kickoff"
+  },
+  {
+    "id": "SF-068",
+    "title": "Create scheduled flow for stale leads",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Review Stale Leads",
+      "object": "Lead",
+      "trigger": "scheduled",
+      "updateField": "Needs_Review__c",
+      "updateValue": "true"
+    },
+    "concept": "Scheduled flows run on a timed basis to review or update records.",
+    "steps": [
+      "Create flow Review Stale Leads.",
+      "Object Lead.",
+      "Trigger Scheduled.",
+      "Update Needs_Review__c to true."
+    ],
+    "hint": "Choose Scheduled as the trigger.",
+    "demo": "Flow Name: Review Stale Leads; Trigger: Scheduled; Update: Needs_Review__c = true"
+  },
+  {
+    "id": "SF-069",
+    "title": "Create flow for contract renewal",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Contract Renewal Reminder",
+      "object": "Contract",
+      "trigger": "scheduled",
+      "updateField": "Renewal_Review__c",
+      "updateValue": "Needed"
+    },
+    "concept": "Scheduled automation helps teams manage renewals before contracts expire.",
+    "steps": [
+      "Create flow Contract Renewal Reminder.",
+      "Object Contract.",
+      "Trigger Scheduled.",
+      "Update Renewal_Review__c to Needed."
+    ],
+    "hint": "Object should be Contract.",
+    "demo": "Flow Name: Contract Renewal Reminder; Object: Contract; Update: Renewal_Review__c = Needed"
+  },
+  {
+    "id": "SF-070",
+    "title": "Create flow to mark webinar leads",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Mark Webinar Members",
+      "object": "CampaignMember",
+      "trigger": "afterCreate",
+      "updateField": "Engagement_Type__c",
+      "updateValue": "Webinar"
+    },
+    "concept": "Marketing automation can enrich campaign member records.",
+    "steps": [
+      "Create flow Mark Webinar Members.",
+      "Object CampaignMember.",
+      "Trigger After Create.",
+      "Update Engagement_Type__c to Webinar."
+    ],
+    "hint": "Use CampaignMember as the object.",
+    "demo": "Flow Name: Mark Webinar Members; Object: CampaignMember; Update: Engagement_Type__c = Webinar"
+  },
+  {
+    "id": "SF-071",
+    "title": "Create flow for product review",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Product Review Needed",
+      "object": "Product2",
+      "trigger": "afterCreate",
+      "updateField": "Review_Status__c",
+      "updateValue": "Pending"
+    },
+    "concept": "Product catalog automation helps enforce review steps.",
+    "steps": [
+      "Create flow Product Review Needed.",
+      "Object Product2.",
+      "Trigger After Create.",
+      "Update Review_Status__c to Pending."
+    ],
+    "hint": "The product object is Product2.",
+    "demo": "Flow Name: Product Review Needed; Object: Product2; Update: Review_Status__c = Pending"
+  },
+  {
+    "id": "SF-072",
+    "title": "Create flow for task escalation",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Escalate Overdue Tasks",
+      "object": "Task",
+      "trigger": "scheduled",
+      "updateField": "Escalation_Status__c",
+      "updateValue": "Review"
+    },
+    "concept": "Scheduled activity automation can surface overdue work.",
+    "steps": [
+      "Create flow Escalate Overdue Tasks.",
+      "Object Task.",
+      "Trigger Scheduled.",
+      "Update Escalation_Status__c to Review."
+    ],
+    "hint": "Use trigger Scheduled.",
+    "demo": "Flow Name: Escalate Overdue Tasks; Object: Task; Update: Escalation_Status__c = Review"
+  },
+  {
+    "id": "SF-073",
+    "title": "Create flow for account health",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Set Account Health",
+      "object": "Account",
+      "trigger": "afterCreate",
+      "updateField": "Health__c",
+      "updateValue": "New"
+    },
+    "concept": "Automation can initialize account health indicators.",
+    "steps": [
+      "Create flow Set Account Health.",
+      "Object Account.",
+      "Trigger After Create.",
+      "Update Health__c to New."
+    ],
+    "hint": "Update field Health__c, value New.",
+    "demo": "Flow Name: Set Account Health; Object: Account; Update: Health__c = New"
+  },
+  {
+    "id": "SF-074",
+    "title": "Create flow for project budget review",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Project Budget Review",
+      "object": "Project__c",
+      "trigger": "afterCreate",
+      "updateField": "Budget_Review__c",
+      "updateValue": "Required"
+    },
+    "concept": "Flows can flag custom records that need review.",
+    "steps": [
+      "Create flow Project Budget Review.",
+      "Object Project__c.",
+      "Trigger After Create.",
+      "Update Budget_Review__c to Required."
+    ],
+    "hint": "Use Project__c as the object.",
+    "demo": "Flow Name: Project Budget Review; Object: Project__c; Update: Budget_Review__c = Required"
+  },
+  {
+    "id": "SF-075",
+    "title": "Create flow for account welcome task",
+    "level": "Advanced",
+    "track": "Automation",
+    "xp": 100,
+    "task": {
+      "action": "createFlow",
+      "name": "Create Welcome Task Flag",
+      "object": "Account",
+      "trigger": "afterCreate",
+      "updateField": "Welcome_Task_Needed__c",
+      "updateValue": "true"
+    },
+    "concept": "In a real org, flows can create related records; this simulator uses a flag to represent that design.",
+    "steps": [
+      "Create flow Create Welcome Task Flag.",
+      "Object Account.",
+      "Trigger After Create.",
+      "Update Welcome_Task_Needed__c to true."
+    ],
+    "hint": "The lesson validates the flow definition fields.",
+    "demo": "Flow Name: Create Welcome Task Flag; Update: Welcome_Task_Needed__c = true"
+  },
+  {
+    "id": "SF-076",
+    "title": "SOQL select Account names",
+    "level": "Beginner",
+    "track": "SOQL",
+    "xp": 50,
+    "task": {
+      "action": "runSOQL",
+      "object": "Account",
+      "fields": [
+        "Name"
+      ]
+    },
+    "concept": "SOQL retrieves Salesforce records using object and field names.",
+    "steps": [
+      "Open SOQL.",
+      "Write SELECT Name FROM Account.",
+      "Run the query.",
+      "Check the lesson."
+    ],
+    "hint": "Start with SELECT, then fields, then FROM object.",
+    "demo": "SELECT Name FROM Account"
+  },
+  {
+    "id": "SF-077",
+    "title": "SOQL select Account industry",
+    "level": "Beginner",
+    "track": "SOQL",
+    "xp": 50,
+    "task": {
+      "action": "runSOQL",
+      "object": "Account",
+      "fields": [
+        "Name",
+        "Industry"
+      ]
+    },
+    "concept": "Selecting multiple fields returns more useful columns.",
+    "steps": [
+      "Query Account.",
+      "Select Name and Industry.",
+      "Run SOQL."
+    ],
+    "hint": "Separate fields with commas.",
+    "demo": "SELECT Name, Industry FROM Account LIMIT 10"
+  },
+  {
+    "id": "SF-078",
+    "title": "SOQL filter nonprofit accounts",
+    "level": "Intermediate",
+    "track": "SOQL",
+    "xp": 75,
+    "task": {
+      "action": "runSOQL",
+      "object": "Account",
+      "fields": [
+        "Name",
+        "Industry"
+      ],
+      "whereContains": "Industry = 'Nonprofit'"
+    },
+    "concept": "WHERE filters limit results to records that match criteria.",
+    "steps": [
+      "Write a query on Account.",
+      "Select Name and Industry.",
+      "Add WHERE Industry = 'Nonprofit'."
+    ],
+    "hint": "Text values must use quotes.",
+    "demo": "SELECT Name, Industry FROM Account WHERE Industry = 'Nonprofit'"
+  },
+  {
+    "id": "SF-079",
+    "title": "SOQL list contacts",
+    "level": "Beginner",
+    "track": "SOQL",
+    "xp": 50,
+    "task": {
+      "action": "runSOQL",
+      "object": "Contact",
+      "fields": [
+        "FirstName",
+        "LastName",
+        "Email"
+      ]
+    },
+    "concept": "Contact queries help find people and communication details.",
+    "steps": [
+      "Query Contact.",
+      "Select FirstName, LastName, and Email.",
+      "Run SOQL."
+    ],
+    "hint": "Use Contact, not Contacts.",
+    "demo": "SELECT FirstName, LastName, Email FROM Contact"
+  },
+  {
+    "id": "SF-080",
+    "title": "SOQL list open leads",
+    "level": "Intermediate",
+    "track": "SOQL",
+    "xp": 75,
+    "task": {
+      "action": "runSOQL",
+      "object": "Lead",
+      "fields": [
+        "FirstName",
+        "LastName",
+        "Status"
+      ],
+      "whereContains": "Status = 'Open - Not Contacted'"
+    },
+    "concept": "SOQL filters can support lead queue reviews.",
+    "steps": [
+      "Query Lead.",
+      "Select FirstName, LastName, Status.",
+      "Filter Status = 'Open - Not Contacted'."
+    ],
+    "hint": "The status string must match exactly.",
+    "demo": "SELECT FirstName, LastName, Status FROM Lead WHERE Status = 'Open - Not Contacted'"
+  },
+  {
+    "id": "SF-081",
+    "title": "SOQL list opportunities",
+    "level": "Beginner",
+    "track": "SOQL",
+    "xp": 50,
+    "task": {
+      "action": "runSOQL",
+      "object": "Opportunity",
+      "fields": [
+        "Name",
+        "StageName",
+        "Amount"
+      ]
+    },
+    "concept": "Opportunity queries show pipeline data.",
+    "steps": [
+      "Query Opportunity.",
+      "Select Name, StageName, Amount."
+    ],
+    "hint": "StageName is one word.",
+    "demo": "SELECT Name, StageName, Amount FROM Opportunity"
+  },
+  {
+    "id": "SF-082",
+    "title": "SOQL filter high-value deals",
+    "level": "Intermediate",
+    "track": "SOQL",
+    "xp": 75,
+    "task": {
+      "action": "runSOQL",
+      "object": "Opportunity",
+      "fields": [
+        "Name",
+        "Amount"
+      ],
+      "whereContains": "Amount > 50000"
+    },
+    "concept": "Numeric filters do not need quotes.",
+    "steps": [
+      "Query Opportunity.",
+      "Select Name and Amount.",
+      "Filter Amount > 50000."
+    ],
+    "hint": "Do not put quotes around 50000.",
+    "demo": "SELECT Name, Amount FROM Opportunity WHERE Amount > 50000"
+  },
+  {
+    "id": "SF-083",
+    "title": "SOQL list cases by priority",
+    "level": "Beginner",
+    "track": "SOQL",
+    "xp": 50,
+    "task": {
+      "action": "runSOQL",
+      "object": "Case",
+      "fields": [
+        "Subject",
+        "Priority",
+        "Status"
+      ]
+    },
+    "concept": "Case queries help service teams inspect support workload.",
+    "steps": [
+      "Query Case.",
+      "Select Subject, Priority, Status."
+    ],
+    "hint": "The object is Case, not Cases.",
+    "demo": "SELECT Subject, Priority, Status FROM Case"
+  },
+  {
+    "id": "SF-084",
+    "title": "SOQL filter critical cases",
+    "level": "Intermediate",
+    "track": "SOQL",
+    "xp": 75,
+    "task": {
+      "action": "runSOQL",
+      "object": "Case",
+      "fields": [
+        "Subject",
+        "Priority"
+      ],
+      "whereContains": "Priority = 'Critical'"
+    },
+    "concept": "Text filters require quoted values.",
+    "steps": [
+      "Query Case.",
+      "Select Subject and Priority.",
+      "Filter Priority = 'Critical'."
+    ],
+    "hint": "Critical must be in single quotes.",
+    "demo": "SELECT Subject, Priority FROM Case WHERE Priority = 'Critical'"
+  },
+  {
+    "id": "SF-085",
+    "title": "SOQL order opportunities by Amount",
+    "level": "Advanced",
+    "track": "SOQL",
+    "xp": 100,
+    "task": {
+      "action": "runSOQL",
+      "object": "Opportunity",
+      "fields": [
+        "Name",
+        "Amount"
+      ],
+      "orderBy": "Amount"
+    },
+    "concept": "ORDER BY sorts query results.",
+    "steps": [
+      "Query Opportunity.",
+      "Select Name and Amount.",
+      "Add ORDER BY Amount DESC."
+    ],
+    "hint": "The simulator checks that ORDER BY Amount is included.",
+    "demo": "SELECT Name, Amount FROM Opportunity ORDER BY Amount DESC"
+  },
+  {
+    "id": "SF-086",
+    "title": "SOQL limit account results",
+    "level": "Intermediate",
+    "track": "SOQL",
+    "xp": 75,
+    "task": {
+      "action": "runSOQL",
+      "object": "Account",
+      "fields": [
+        "Name"
+      ],
+      "limit": 5
+    },
+    "concept": "LIMIT controls the number of rows returned.",
+    "steps": [
+      "Query Account.",
+      "Select Name.",
+      "Add LIMIT 5."
+    ],
+    "hint": "LIMIT goes at the end.",
+    "demo": "SELECT Name FROM Account LIMIT 5"
+  },
+  {
+    "id": "SF-087",
+    "title": "SOQL query custom project object",
+    "level": "Advanced",
+    "track": "SOQL",
+    "xp": 100,
+    "task": {
+      "action": "runSOQL",
+      "object": "Project__c",
+      "fields": [
+        "Name",
+        "Status__c"
+      ]
+    },
+    "concept": "Custom objects and fields use API names ending in __c.",
+    "steps": [
+      "Create Project__c and Status__c if needed.",
+      "Query Project__c.",
+      "Select Name and Status__c."
+    ],
+    "hint": "Custom object API names must include __c.",
+    "demo": "SELECT Name, Status__c FROM Project__c"
+  },
+  {
+    "id": "SF-088",
+    "title": "SOQL filter projects by status",
+    "level": "Advanced",
+    "track": "SOQL",
+    "xp": 100,
+    "task": {
+      "action": "runSOQL",
+      "object": "Project__c",
+      "fields": [
+        "Name",
+        "Status__c"
+      ],
+      "whereContains": "Status__c = 'Active'"
+    },
+    "concept": "Custom field filters use the custom field API name.",
+    "steps": [
+      "Query Project__c.",
+      "Select Name and Status__c.",
+      "Add WHERE Status__c = 'Active'."
+    ],
+    "hint": "Use Status__c in the WHERE clause.",
+    "demo": "SELECT Name, Status__c FROM Project__c WHERE Status__c = 'Active'"
+  },
+  {
+    "id": "SF-089",
+    "title": "SOQL query campaigns",
+    "level": "Beginner",
+    "track": "SOQL",
+    "xp": 50,
+    "task": {
+      "action": "runSOQL",
+      "object": "Campaign",
+      "fields": [
+        "Name",
+        "Status",
+        "Type"
+      ]
+    },
+    "concept": "Campaign queries support marketing operations.",
+    "steps": [
+      "Query Campaign.",
+      "Select Name, Status, Type."
+    ],
+    "hint": "Use Type as a selected field.",
+    "demo": "SELECT Name, Status, Type FROM Campaign"
+  },
+  {
+    "id": "SF-090",
+    "title": "SOQL query campaign members",
+    "level": "Intermediate",
+    "track": "SOQL",
+    "xp": 75,
+    "task": {
+      "action": "runSOQL",
+      "object": "CampaignMember",
+      "fields": [
+        "CampaignName",
+        "LeadName",
+        "Status"
+      ]
+    },
+    "concept": "CampaignMember joins campaign engagement to people in a simplified way here.",
+    "steps": [
+      "Query CampaignMember.",
+      "Select CampaignName, LeadName, Status."
+    ],
+    "hint": "Use CampaignMember as one word.",
+    "demo": "SELECT CampaignName, LeadName, Status FROM CampaignMember"
+  },
+  {
+    "id": "SF-091",
+    "title": "SOQL query tasks",
+    "level": "Beginner",
+    "track": "SOQL",
+    "xp": 50,
+    "task": {
+      "action": "runSOQL",
+      "object": "Task",
+      "fields": [
+        "Subject",
+        "Status",
+        "Priority"
+      ]
+    },
+    "concept": "Task queries help report on work activity.",
+    "steps": [
+      "Query Task.",
+      "Select Subject, Status, Priority."
+    ],
+    "hint": "Subject is the main task field.",
+    "demo": "SELECT Subject, Status, Priority FROM Task"
+  },
+  {
+    "id": "SF-092",
+    "title": "SOQL filter completed tasks",
+    "level": "Intermediate",
+    "track": "SOQL",
+    "xp": 75,
+    "task": {
+      "action": "runSOQL",
+      "object": "Task",
+      "fields": [
+        "Subject",
+        "Status"
+      ],
+      "whereContains": "Status = 'Completed'"
+    },
+    "concept": "Filtering completed tasks creates an activity completion view.",
+    "steps": [
+      "Query Task.",
+      "Select Subject and Status.",
+      "Filter Status = 'Completed'."
+    ],
+    "hint": "Completed must be quoted.",
+    "demo": "SELECT Subject, Status FROM Task WHERE Status = 'Completed'"
+  },
+  {
+    "id": "SF-093",
+    "title": "Create an email template for cases",
+    "level": "Advanced",
+    "track": "Service Cloud",
+    "xp": 125,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "EmailTemplate",
+      "name": "Case_Update_Template",
+      "object": "Case"
+    },
+    "concept": "Email templates help teams respond consistently and quickly.",
+    "steps": [
+      "Open Setup.",
+      "Create Admin Asset.",
+      "Kind EmailTemplate.",
+      "Name Case_Update_Template.",
+      "Object Case."
+    ],
+    "hint": "Use EmailTemplate as the asset kind.",
+    "demo": "{\"object\":\"Case\",\"subject\":\"Update on your case\"}"
+  },
+  {
+    "id": "SF-094",
+    "title": "Create an approval process for discounts",
+    "level": "Advanced",
+    "track": "Sales Cloud",
+    "xp": 125,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "ApprovalProcess",
+      "name": "Opportunity_Discount_Approval",
+      "object": "Opportunity"
+    },
+    "concept": "Approval processes control changes that require review.",
+    "steps": [
+      "Create Admin Asset.",
+      "Kind ApprovalProcess.",
+      "Name Opportunity_Discount_Approval.",
+      "Object Opportunity."
+    ],
+    "hint": "Use Opportunity as the object.",
+    "demo": "{\"object\":\"Opportunity\",\"criteria\":\"Discount_Percent__c > 20\"}"
+  },
+  {
+    "id": "SF-095",
+    "title": "Create a data import plan asset",
+    "level": "Advanced",
+    "track": "Data Management",
+    "xp": 125,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "DataImportPlan",
+      "name": "Account_Contact_Import_Plan",
+      "object": "Data"
+    },
+    "concept": "Strong data import plans include order, matching, cleanup, and validation.",
+    "steps": [
+      "Create Admin Asset.",
+      "Kind DataImportPlan.",
+      "Name Account_Contact_Import_Plan.",
+      "Object Data."
+    ],
+    "hint": "Use Admin Asset for planning artifacts.",
+    "demo": "{\"object\":\"Data\",\"order\":[\"Account\",\"Contact\"],\"match\":\"Email\"}"
+  },
+  {
+    "id": "SF-096",
+    "title": "Create a backup strategy asset",
+    "level": "Advanced",
+    "track": "Data Management",
+    "xp": 125,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "BackupPlan",
+      "name": "Weekly_Metadata_Backup",
+      "object": "Org"
+    },
+    "concept": "Admins need backup and change-tracking habits before making large changes.",
+    "steps": [
+      "Create Admin Asset.",
+      "Kind BackupPlan.",
+      "Name Weekly_Metadata_Backup.",
+      "Object Org."
+    ],
+    "hint": "The object should be Org for this planning asset.",
+    "demo": "{\"object\":\"Org\",\"frequency\":\"Weekly\"}"
+  },
+  {
+    "id": "SF-097",
+    "title": "Create a release management checklist",
+    "level": "Advanced",
+    "track": "Admin Strategy",
+    "xp": 125,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "ReleaseChecklist",
+      "name": "Sandbox_to_Production_Checklist",
+      "object": "Org"
+    },
+    "concept": "Release checklists reduce production mistakes.",
+    "steps": [
+      "Create Admin Asset.",
+      "Kind ReleaseChecklist.",
+      "Name Sandbox_to_Production_Checklist.",
+      "Object Org."
+    ],
+    "hint": "Use ReleaseChecklist as the kind.",
+    "demo": "{\"object\":\"Org\",\"steps\":[\"Test\",\"UAT\",\"Deploy\",\"Validate\"]}"
+  },
+  {
+    "id": "SF-098",
+    "title": "Create a sandbox testing plan",
+    "level": "Advanced",
+    "track": "Admin Strategy",
+    "xp": 125,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "TestPlan",
+      "name": "Salesforce_Quest_Test_Plan",
+      "object": "Org"
+    },
+    "concept": "Testing in a sandbox helps catch errors before users are affected.",
+    "steps": [
+      "Create Admin Asset.",
+      "Kind TestPlan.",
+      "Name Salesforce_Quest_Test_Plan.",
+      "Object Org."
+    ],
+    "hint": "This lesson checks that you built a TestPlan asset.",
+    "demo": "{\"object\":\"Org\",\"coverage\":[\"records\",\"security\",\"flows\",\"reports\"]}"
+  },
+  {
+    "id": "SF-099",
+    "title": "Create an integration key inventory",
+    "level": "Advanced",
+    "track": "Integration",
+    "xp": 125,
+    "task": {
+      "action": "createMetadata",
+      "assetType": "IntegrationInventory",
+      "name": "External_API_Inventory",
+      "object": "Integration"
+    },
+    "concept": "Integration documentation helps teams understand what systems exchange data.",
+    "steps": [
+      "Create Admin Asset.",
+      "Kind IntegrationInventory.",
+      "Name External_API_Inventory.",
+      "Object Integration."
+    ],
+    "hint": "Use Integration as the object.",
+    "demo": "{\"object\":\"Integration\",\"systems\":[\"ElevenLabs\",\"ERP\",\"Website\"]}"
+  },
+  {
+    "id": "SF-100",
+    "title": "Capstone: build a CRM launch report",
+    "level": "Advanced",
+    "track": "Capstone",
+    "xp": 125,
+    "task": {
+      "action": "createReport",
+      "name": "CRM Launch Opportunities",
+      "object": "Opportunity",
+      "groupBy": "StageName"
+    },
+    "concept": "A capstone combines data entry, field design, and reporting into a practical workflow.",
+    "steps": [
+      "Make sure you have Opportunity records.",
+      "Create a report named CRM Launch Opportunities.",
+      "Object Opportunity.",
+      "Group By StageName.",
+      "Check the lesson."
+    ],
+    "hint": "The report name must be CRM Launch Opportunities.",
+    "demo": "Name: CRM Launch Opportunities, Object: Opportunity, Group By: StageName"
+  }
+];
+
+  </script>
+  <script>
+const STORAGE_KEY = "sfq_state_v1";
+const LESSONS = window.SFQ_LESSONS || [];
+
+const state = loadState();
+let currentLessonId = state.currentLessonId || (LESSONS[0] && LESSONS[0].id);
+let filteredLessons = [];
+
+const badgeRules = [
+  { id: "first-step", icon: "🚀", name: "First Step", desc: "Complete your first lesson", test: s => s.completed.length >= 1 },
+  { id: "crm-builder", icon: "🏢", name: "CRM Builder", desc: "Complete 10 CRM, sales, service, or marketing lessons", test: s => countCompletedTracks(s, ["CRM Foundations", "Sales Cloud", "Service Cloud", "Marketing"]) >= 10 },
+  { id: "data-modeler", icon: "🧱", name: "Data Modeler", desc: "Complete 5 data modeling lessons", test: s => countCompletedTracks(s, ["Data Modeling"]) >= 5 },
+  { id: "data-quality", icon: "✅", name: "Data Quality Defender", desc: "Complete 3 data quality lessons", test: s => countCompletedTracks(s, ["Data Quality"]) >= 3 },
+  { id: "security", icon: "🔐", name: "Security Specialist", desc: "Complete 5 security lessons", test: s => countCompletedTracks(s, ["Security"]) >= 5 },
+  { id: "report-ranger", icon: "📊", name: "Report Ranger", desc: "Complete 5 report or dashboard lessons", test: s => countCompletedTracks(s, ["Reports & Dashboards"]) >= 5 },
+  { id: "flow-architect", icon: "⚙️", name: "Flow Architect", desc: "Complete 5 automation lessons", test: s => countCompletedTracks(s, ["Automation"]) >= 5 },
+  { id: "soql-slinger", icon: "🧠", name: "SOQL Slinger", desc: "Complete 5 SOQL lessons", test: s => countCompletedTracks(s, ["SOQL"]) >= 5 },
+  { id: "advanced-admin", icon: "🛠️", name: "Advanced Admin", desc: "Complete 10 advanced lessons", test: s => s.completed.filter(id => lessonById(id)?.level === "Advanced").length >= 10 },
+  { id: "capstone", icon: "🏆", name: "Capstone Champion", desc: "Complete a capstone lesson", test: s => countCompletedTracks(s, ["Capstone"]) >= 1 },
+  { id: "streak-7", icon: "🔥", name: "Seven Lesson Streak", desc: "Complete 7 lessons without resetting", test: s => s.streak >= 7 },
+  { id: "xp-1000", icon: "💎", name: "1,000 XP Club", desc: "Earn 1,000 XP", test: s => s.xp >= 1000 },
+  { id: "master", icon: "🌟", name: "Salesforce Quest Master", desc: "Complete all 100 lessons", test: s => s.completed.length >= LESSONS.length },
+];
+
+const $ = selector => document.querySelector(selector);
+const $$ = selector => [...document.querySelectorAll(selector)];
+
+function defaultOrg() {
+  return {
+    schema: {
+      Account: { label: "Account", fields: { Name: "Text", Industry: "Picklist", Phone: "Phone", Website: "URL" } },
+      Contact: { label: "Contact", fields: { FirstName: "Text", LastName: "Text", AccountName: "Lookup", Email: "Email", Title: "Text" } },
+      Lead: { label: "Lead", fields: { FirstName: "Text", LastName: "Text", Company: "Text", Status: "Picklist", LeadSource: "Picklist" } },
+      Opportunity: { label: "Opportunity", fields: { Name: "Text", StageName: "Picklist", Amount: "Currency", CloseDate: "Date" } },
+      Case: { label: "Case", fields: { Subject: "Text", Status: "Picklist", Priority: "Picklist", Origin: "Picklist" } },
+      Task: { label: "Task", fields: { Subject: "Text", Status: "Picklist", Priority: "Picklist", ActivityDate: "Date" } },
+      Campaign: { label: "Campaign", fields: { Name: "Text", Type: "Picklist", Status: "Picklist" } },
+      CampaignMember: { label: "Campaign Member", fields: { CampaignName: "Text", LeadName: "Text", ContactName: "Text", Status: "Picklist" } },
+      Product2: { label: "Product", fields: { Name: "Text", IsActive: "Checkbox", ProductCode: "Text" } },
+      Contract: { label: "Contract", fields: { AccountName: "Lookup", Status: "Picklist", ContractTerm: "Number" } },
+    },
+    records: {
+      Account: [
+        { Id: "ACC-001", Name: "Trailhead Sample Co", Industry: "Technology" },
+        { Id: "ACC-002", Name: "Community Compass", Industry: "Nonprofit" }
+      ],
+      Contact: [], Lead: [], Opportunity: [], Case: [], Task: [], Campaign: [], CampaignMember: [], Product2: [], Contract: []
+    },
+    validationRules: [],
+    relationships: [],
+    permissionSets: [],
+    users: [],
+    metadata: [],
+    flows: [],
+    reports: [],
+    dashboards: [],
+    soqlHistory: []
+  };
+}
+
+function loadState() {
+  const fallback = {
+    order: shuffle(LESSONS.map(l => l.id)),
+    completed: [],
+    xp: 0,
+    streak: 0,
+    badges: [],
+    errors: [],
+    org: defaultOrg(),
+    audio: { mode: "browser", elevenKey: "", elevenVoice: "EXAVITQu4vr4xnSDxMaL", elevenModel: "eleven_multilingual_v2" }
+  };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    if (!saved) return fallback;
+    saved.order = saved.order?.filter(id => LESSONS.some(l => l.id === id));
+    const missing = LESSONS.map(l => l.id).filter(id => !saved.order.includes(id));
+    saved.order.push(...missing);
+    saved.org = deepMerge(defaultOrg(), saved.org || {});
+    saved.audio = { ...fallback.audio, ...(saved.audio || {}) };
+    saved.completed = saved.completed || [];
+    saved.badges = saved.badges || [];
+    saved.errors = saved.errors || [];
+    return { ...fallback, ...saved };
+  } catch (err) {
+    return fallback;
+  }
+}
+
+function saveState() {
+  state.currentLessonId = currentLessonId;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function deepMerge(target, source) {
+  const output = Array.isArray(target) ? [...target] : { ...target };
+  for (const key of Object.keys(source || {})) {
+    if (source[key] && typeof source[key] === "object" && !Array.isArray(source[key]) && target[key]) {
+      output[key] = deepMerge(target[key], source[key]);
+    } else {
+      output[key] = source[key];
+    }
+  }
+  return output;
+}
+
+function shuffle(arr) {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+function init() {
+  wireEvents();
+  populateTrackFilter();
+  populateObjectPickers();
+  hydrateAudioSettings();
+  renderAll();
+  selectLesson(currentLessonId);
+}
+
+function wireEvents() {
+  $("#newSessionBtn").addEventListener("click", () => {
+    state.order = shuffle(LESSONS.map(l => l.id));
+    currentLessonId = state.order[0];
+    saveState();
+    renderAll();
+    selectLesson(currentLessonId);
+    setFeedback("New mixed session created. Lessons are shuffled while your completed progress and badges stay saved.", "success");
+  });
+
+  $("#resetBtn").addEventListener("click", () => {
+    if (!confirm("Reset all simulator progress, badges, mock org data, and audio settings?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  });
+
+  $("#trackFilter").addEventListener("change", renderLessonList);
+  $("#lessonSearch").addEventListener("input", renderLessonList);
+
+  $("#prevLessonBtn").addEventListener("click", () => moveLesson(-1));
+  $("#nextLessonBtn").addEventListener("click", () => moveLesson(1));
+  $("#completeBtn").addEventListener("click", checkCurrentLesson);
+  $("#hintBtn").addEventListener("click", () => setFeedback(currentLesson().hint, "info"));
+  $("#demoBtn").addEventListener("click", fillDemoForLesson);
+  $("#speakLessonBtn").addEventListener("click", speakCurrentLesson);
+
+  $$(".tab").forEach(btn => btn.addEventListener("click", () => {
+    $$(".tab").forEach(b => b.classList.remove("active"));
+    $$(".tab-page").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    $("#" + btn.dataset.tab).classList.add("active");
+  }));
+
+  $("#runRecordBtn").addEventListener("click", runRecordAction);
+  $("#runSetupBtn").addEventListener("click", runSetupAction);
+  $("#runSoqlBtn").addEventListener("click", () => runSOQL($("#soqlEditor").value, true));
+  $("#sampleSoqlBtn").addEventListener("click", () => { $("#soqlEditor").value = currentLesson()?.demo?.startsWith("SELECT") ? currentLesson().demo : "SELECT Name, Industry FROM Account LIMIT 10"; });
+  $("#createReportBtn").addEventListener("click", createReportFromForm);
+  $("#createDashboardBtn").addEventListener("click", createDashboardFromForm);
+  $("#createFlowBtn").addEventListener("click", createFlowFromForm);
+  $("#saveAudioBtn").addEventListener("click", saveAudioSettings);
+  $("#recordAction").addEventListener("change", () => toggleUpdateFields());
+}
+
+function populateTrackFilter() {
+  const tracks = [...new Set(LESSONS.map(l => l.track))].sort();
+  const filter = $("#trackFilter");
+  tracks.forEach(track => {
+    const option = document.createElement("option");
+    option.value = track;
+    option.textContent = track;
+    filter.appendChild(option);
+  });
+}
+
+function objectNames() {
+  return Object.keys(state.org.schema).sort();
+}
+
+function populateObjectPickers() {
+  const ids = ["#recordObject", "#setupObject", "#reportObject", "#flowObject"];
+  for (const id of ids) {
+    const select = $(id);
+    if (!select) continue;
+    const existing = select.value;
+    select.innerHTML = objectNames().map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("");
+    if (existing && objectNames().includes(existing)) select.value = existing;
+  }
+}
+
+function hydrateAudioSettings() {
+  $("#audioMode").value = state.audio.mode;
+  $("#elevenKey").value = state.audio.elevenKey;
+  $("#elevenVoice").value = state.audio.elevenVoice;
+  $("#elevenModel").value = state.audio.elevenModel;
+}
+
+function renderAll() {
+  renderStats();
+  renderLessonList();
+  renderBadges();
+  renderOrgSnapshot();
+  renderErrors();
+  renderDataPreview();
+  renderSetupPreview();
+  renderReportPreview();
+  renderFlowPreview();
+  populateObjectPickers();
+}
+
+function renderStats() {
+  $("#xpStat").textContent = state.xp;
+  $("#completedStat").textContent = `${state.completed.length} / ${LESSONS.length}`;
+  $("#badgeStat").textContent = state.badges.length;
+  $("#streakStat").textContent = state.streak;
+}
+
+function renderLessonList() {
+  const track = $("#trackFilter").value;
+  const query = $("#lessonSearch").value.trim().toLowerCase();
+  filteredLessons = state.order.map(lessonById).filter(Boolean).filter(lesson => {
+    const matchesTrack = track === "all" || lesson.track === track;
+    const haystack = `${lesson.id} ${lesson.title} ${lesson.track} ${lesson.level}`.toLowerCase();
+    return matchesTrack && (!query || haystack.includes(query));
+  });
+  $("#lessonList").innerHTML = filteredLessons.map(lesson => `
+    <div class="lesson-card ${lesson.id === currentLessonId ? "active" : ""} ${state.completed.includes(lesson.id) ? "completed" : ""}" data-id="${lesson.id}">
+      <strong>${lesson.id}: ${escapeHtml(lesson.title)}</strong>
+      <span>${escapeHtml(lesson.level)} • ${escapeHtml(lesson.track)} • ${lesson.xp} XP ${state.completed.includes(lesson.id) ? "• Completed" : ""}</span>
+    </div>
+  `).join("");
+  $$(".lesson-card").forEach(card => card.addEventListener("click", () => selectLesson(card.dataset.id)));
+}
+
+function renderBadges() {
+  checkBadges(false);
+  $("#badgeList").innerHTML = badgeRules.map(rule => {
+    const unlocked = state.badges.includes(rule.id);
+    return `<div class="badge ${unlocked ? "" : "locked"}"><span class="badge-icon">${rule.icon}</span><div><strong>${escapeHtml(rule.name)}</strong><span>${escapeHtml(rule.desc)}${unlocked ? " • Unlocked" : ""}</span></div></div>`;
+  }).join("");
+}
+
+function renderOrgSnapshot() {
+  const recordCount = Object.entries(state.org.records).map(([obj, rows]) => `<li>${escapeHtml(obj)}: ${rows.length} record${rows.length === 1 ? "" : "s"}</li>`).join("");
+  $("#orgSnapshot").innerHTML = `
+    <ul>
+      <li>${Object.keys(state.org.schema).length} objects</li>
+      <li>${state.org.validationRules.length} validation rules</li>
+      <li>${state.org.relationships.length} relationships</li>
+      <li>${state.org.permissionSets.length} permission sets</li>
+      <li>${state.org.users.length} users</li>
+      <li>${state.org.flows.length} flows</li>
+      <li>${state.org.reports.length} reports</li>
+      <li>${state.org.dashboards.length} dashboards</li>
+    </ul>
+    <h3>Records</h3><ul>${recordCount}</ul>`;
+}
+
+function renderErrors() {
+  if (!state.errors.length) {
+    $("#errorLog").textContent = "No errors yet. Try a lesson and the coach will explain mistakes.";
+    return;
+  }
+  $("#errorLog").innerHTML = state.errors.slice(-6).reverse().map(e => `<div class="err"><strong>${escapeHtml(e.title)}</strong><br>${escapeHtml(e.message)}</div>`).join("");
+}
+
+function selectLesson(id) {
+  currentLessonId = id || currentLessonId;
+  const lesson = currentLesson();
+  if (!lesson) return;
+  $("#lessonLevel").textContent = `${lesson.level} • ${lesson.track} • ${lesson.xp} XP`;
+  $("#lessonTitle").textContent = `${lesson.id}: ${lesson.title}`;
+  $("#lessonConcept").textContent = lesson.concept;
+  $("#lessonSteps").innerHTML = lesson.steps.map(step => `<li>${escapeHtml(step)}</li>`).join("");
+  setFeedback(`Ready. Complete the task in the workbench, then choose Check Lesson.`, "info");
+  saveState();
+  renderLessonList();
+}
+
+function currentLesson() { return lessonById(currentLessonId); }
+function lessonById(id) { return LESSONS.find(l => l.id === id); }
+
+function moveLesson(delta) {
+  const list = filteredLessons.length ? filteredLessons : state.order.map(lessonById).filter(Boolean);
+  const index = Math.max(0, list.findIndex(l => l.id === currentLessonId));
+  const next = list[(index + delta + list.length) % list.length];
+  if (next) selectLesson(next.id);
+}
+
+function setFeedback(message, type = "info") {
+  const el = $("#feedback");
+  el.className = `feedback ${type}`;
+  el.textContent = message;
+}
+
+function addError(title, message) {
+  state.errors.push({ title, message, at: new Date().toISOString() });
+  state.errors = state.errors.slice(-20);
+  saveState();
+  renderErrors();
+}
+
+function parseJsonInput(value, fallback = {}) {
+  const trimmed = value.trim();
+  if (!trimmed) return fallback;
+  try { return JSON.parse(trimmed); }
+  catch (err) {
+    throw new Error(`JSON error: ${err.message}. Use double quotes around property names and text values.`);
+  }
+}
+
+function runRecordAction() {
+  const action = $("#recordAction").value;
+  const object = $("#recordObject").value;
+  try {
+    ensureObject(object);
+    if (action === "create") {
+      const fields = parseJsonInput($("#recordJson").value);
+      const record = createRecord(object, fields);
+      setFeedback(`Created ${object} record ${record.Id}.`, "success");
+    } else if (action === "update") {
+      const findField = $("#findField").value.trim();
+      const findValue = $("#findValue").value.trim();
+      const updates = parseJsonInput($("#recordJson").value);
+      if (!findField || !findValue) throw new Error("For updates, provide both Find Field and Find Value.");
+      const updated = updateRecord(object, { [findField]: findValue }, updates);
+      setFeedback(`Updated ${object} record ${updated.Id}.`, "success");
+    } else if (action === "delete") {
+      const findField = $("#findField").value.trim();
+      const findValue = $("#findValue").value.trim();
+      if (!findField || !findValue) throw new Error("For deletes, provide both Find Field and Find Value.");
+      deleteRecord(object, { [findField]: findValue });
+      setFeedback(`Deleted matching ${object} record.`, "success");
+    } else if (action === "import") {
+      const rows = parseJsonInput($("#recordJson").value, []);
+      if (!Array.isArray(rows)) throw new Error("Import expects a JSON array like [{\"Name\":\"A\"},{\"Name\":\"B\"}].");
+      rows.forEach(row => createRecord(object, row));
+      setFeedback(`Imported ${rows.length} ${object} records.`, "success");
+    }
+    saveState();
+    renderAll();
+  } catch (err) {
+    setFeedback(err.message, "error");
+    addError("Data Action Error", err.message);
+  }
+}
+
+function ensureObject(object) {
+  if (!state.org.schema[object]) throw new Error(`Unknown object ${object}. Create it first in Setup or check the API name.`);
+  if (!state.org.records[object]) state.org.records[object] = [];
+}
+
+function createRecord(object, fields) {
+  ensureObject(object);
+  if (!fields || typeof fields !== "object" || Array.isArray(fields)) throw new Error("Fields must be a JSON object.");
+  validateRecord(object, fields);
+  const prefix = object.replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase() || "REC";
+  const record = { Id: `${prefix}-${String(state.org.records[object].length + 1).padStart(3, "0")}`, ...fields };
+  applyFlows(object, record, "beforeSave");
+  state.org.records[object].push(record);
+  applyFlows(object, record, "afterCreate");
+  return record;
+}
+
+function updateRecord(object, find, updates) {
+  ensureObject(object);
+  const record = findRecord(object, find);
+  if (!record) throw new Error(`No ${object} record found for ${formatCriteria(find)}. Create the record first or check spelling.`);
+  Object.assign(record, updates);
+  return record;
+}
+
+function deleteRecord(object, find) {
+  ensureObject(object);
+  const idx = state.org.records[object].findIndex(r => matchesFields(r, find));
+  if (idx < 0) throw new Error(`No ${object} record found for ${formatCriteria(find)}.`);
+  state.org.records[object].splice(idx, 1);
+}
+
+function findRecord(object, criteria) {
+  ensureObject(object);
+  return state.org.records[object].find(r => matchesFields(r, criteria));
+}
+
+function matchesFields(record, expected) {
+  return Object.entries(expected || {}).every(([key, value]) => normalize(record[key]) === normalize(value));
+}
+
+function normalize(value) {
+  if (value === undefined || value === null) return "";
+  return String(value).trim().toLowerCase();
+}
+
+function formatCriteria(obj) {
+  return Object.entries(obj || {}).map(([k, v]) => `${k} = ${v}`).join(" and ");
+}
+
+function validateRecord(object, fields) {
+  for (const rule of state.org.validationRules.filter(r => r.object === object)) {
+    if (evaluateRule(rule.formula, fields)) {
+      throw new Error(`${rule.name} failed: ${rule.errorMessage || "Validation rule blocked this record."}`);
+    }
+  }
+}
+
+function evaluateRule(formula = "", fields) {
+  const f = formula.trim();
+  const blank = f.match(/^ISBLANK\(([^)]+)\)$/i);
+  if (blank) return !fields[blank[1].trim()];
+  const comp = f.match(/^([A-Za-z0-9_]+)\s*(<=|>=|<|>|=)\s*'?([^']+)'?$/);
+  if (comp) {
+    const left = fields[comp[1]];
+    const op = comp[2];
+    const rawRight = comp[3];
+    const a = isNaN(Number(left)) ? String(left || "") : Number(left);
+    const b = isNaN(Number(rawRight)) ? String(rawRight || "") : Number(rawRight);
+    if (op === "<=") return a <= b;
+    if (op === ">=") return a >= b;
+    if (op === "<") return a < b;
+    if (op === ">") return a > b;
+    if (op === "=") return normalize(a) === normalize(b);
+  }
+  return false;
+}
+
+function applyFlows(object, record, trigger) {
+  for (const flow of state.org.flows.filter(f => f.object === object && f.trigger === trigger)) {
+    if (!flow.condition || evaluateFlowCondition(flow.condition, record)) {
+      record[flow.updateField] = flow.updateValue;
+    }
+  }
+}
+
+function evaluateFlowCondition(condition, record) {
+  const comp = condition.match(/^([A-Za-z0-9_]+)\s*(<=|>=|<|>|=)\s*'?([^']+)'?$/);
+  if (!comp) return true;
+  return evaluateRule(`${comp[1]} ${comp[2]} ${comp[3]}`, record);
+}
+
+function runSetupAction() {
+  const action = $("#setupAction").value;
+  const targetObject = $("#setupObject").value;
+  const name = $("#setupName").value.trim();
+  const kind = $("#setupKind").value.trim();
+  try {
+    const config = parseJsonInput($("#setupJson").value, {});
+    if (!name) throw new Error("API Name / Name is required.");
+    if (action === "createObject") {
+      const apiName = name;
+      if (!apiName.endsWith("__c")) throw new Error("Custom object API names should end with __c, for example Project__c.");
+      state.org.schema[apiName] = { label: config.label || kind || apiName.replace("__c", ""), fields: { Name: "Text" }, custom: true };
+      state.org.records[apiName] = state.org.records[apiName] || [];
+      setFeedback(`Created custom object ${apiName}.`, "success");
+    } else if (action === "createField") {
+      ensureObject(targetObject);
+      const type = config.type || kind;
+      if (!type) throw new Error("Field type is required in Label / Type or Configuration JSON.");
+      state.org.schema[targetObject].fields[name] = type;
+      setFeedback(`Created ${type} field ${name} on ${targetObject}.`, "success");
+    } else if (action === "createValidationRule") {
+      ensureObject(targetObject);
+      state.org.validationRules.push({ object: targetObject, name, formula: config.formula || kind, errorMessage: config.errorMessage || "Please correct this record." });
+      setFeedback(`Created validation rule ${name} on ${targetObject}.`, "success");
+    } else if (action === "createRelationship") {
+      ensureObject(targetObject);
+      const parentObject = config.parentObject || kind;
+      ensureObject(parentObject);
+      state.org.relationships.push({ childObject: targetObject, parentObject, fieldName: name, type: config.type || "Lookup" });
+      state.org.schema[targetObject].fields[name] = `${config.type || "Lookup"}(${parentObject})`;
+      setFeedback(`Created ${config.type || "Lookup"} relationship ${name} from ${targetObject} to ${parentObject}.`, "success");
+    } else if (action === "createPermissionSet") {
+      const item = { name, object: config.object || targetObject, permission: config.permission || kind || "Read" };
+      state.org.permissionSets.push(item);
+      setFeedback(`Created permission set ${name}.`, "success");
+    } else if (action === "createUser") {
+      const item = { name, profile: config.profile || kind || "Standard User", role: config.role || "User", active: config.active !== false };
+      state.org.users.push(item);
+      setFeedback(`Created user ${name}.`, "success");
+    } else if (action === "createMetadata") {
+      const item = { assetType: kind || config.assetType || "AdminAsset", name, object: config.object || targetObject, ...config };
+      state.org.metadata.push(item);
+      setFeedback(`Created ${item.assetType} asset ${name}.`, "success");
+    }
+    saveState();
+    renderAll();
+  } catch (err) {
+    setFeedback(err.message, "error");
+    addError("Setup Error", err.message);
+  }
+}
+
+function runSOQL(query, shouldRender = false) {
+  try {
+    const parsed = parseSOQL(query);
+    ensureObject(parsed.object);
+    const fields = parsed.fields;
+    for (const f of fields) {
+      if (!fieldExists(parsed.object, f)) throw new Error(`Field ${f} does not exist on ${parsed.object}. Create it first or check the API name.`);
+    }
+    let rows = [...state.org.records[parsed.object]];
+    if (parsed.where) rows = rows.filter(row => evaluateWhere(parsed.where, row));
+    if (parsed.orderBy) rows.sort((a, b) => compareValues(a[parsed.orderBy], b[parsed.orderBy]) * (parsed.orderDir === "DESC" ? -1 : 1));
+    if (parsed.limit) rows = rows.slice(0, parsed.limit);
+    const projected = rows.map(row => Object.fromEntries(fields.map(f => [f, row[f] ?? ""])));
+    state.org.soqlHistory.push({ query, parsed, rowCount: projected.length, at: new Date().toISOString() });
+    state.org.soqlHistory = state.org.soqlHistory.slice(-25);
+    saveState();
+    if (shouldRender) {
+      $("#soqlOutput").innerHTML = renderTable(projected);
+      setFeedback(`SOQL ran successfully and returned ${projected.length} row${projected.length === 1 ? "" : "s"}.`, "success");
+      renderOrgSnapshot();
+    }
+    return projected;
+  } catch (err) {
+    if (shouldRender) {
+      $("#soqlOutput").innerHTML = `<pre>${escapeHtml(err.message)}</pre>`;
+      setFeedback(err.message, "error");
+      addError("SOQL Error", err.message);
+    }
+    throw err;
+  }
+}
+
+function parseSOQL(query) {
+  const clean = query.trim().replace(/\s+/g, " ");
+  const regex = /^SELECT\s+(.+?)\s+FROM\s+([A-Za-z0-9_]+)(?:\s+WHERE\s+(.+?))?(?:\s+ORDER\s+BY\s+([A-Za-z0-9_]+)(?:\s+(ASC|DESC))?)?(?:\s+LIMIT\s+(\d+))?$/i;
+  const m = clean.match(regex);
+  if (!m) throw new Error("SOQL syntax error. Use: SELECT Field1, Field2 FROM Object WHERE Field = 'Value' ORDER BY Field DESC LIMIT 10");
+  return {
+    fields: m[1].split(",").map(f => f.trim()).filter(Boolean),
+    object: m[2].trim(),
+    where: m[3]?.trim(),
+    orderBy: m[4]?.trim(),
+    orderDir: (m[5] || "ASC").toUpperCase(),
+    limit: m[6] ? Number(m[6]) : null
+  };
+}
+
+function fieldExists(object, field) {
+  if (field === "Id") return true;
+  return Boolean(state.org.schema[object]?.fields?.[field]);
+}
+
+function evaluateWhere(where, row) {
+  const m = where.match(/^([A-Za-z0-9_]+)\s*(=|!=|>|<|>=|<=)\s*'?([^']+)'?$/);
+  if (!m) throw new Error(`Unsupported WHERE clause: ${where}. Try Field = 'Value' or Amount > 50000.`);
+  const [, field, op, raw] = m;
+  const left = row[field];
+  const right = isNaN(Number(raw)) ? raw : Number(raw);
+  if (left === undefined) return false;
+  if (op === "=") return normalize(left) === normalize(right);
+  if (op === "!=") return normalize(left) !== normalize(right);
+  const a = Number(left), b = Number(right);
+  if (Number.isNaN(a) || Number.isNaN(b)) return false;
+  if (op === ">") return a > b;
+  if (op === "<") return a < b;
+  if (op === ">=") return a >= b;
+  if (op === "<=") return a <= b;
+  return false;
+}
+
+function compareValues(a, b) {
+  const na = Number(a), nb = Number(b);
+  if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+  return String(a ?? "").localeCompare(String(b ?? ""));
+}
+
+function createReportFromForm() {
+  try {
+    const report = {
+      name: $("#reportName").value.trim(),
+      object: $("#reportObject").value,
+      groupBy: $("#reportGroup").value.trim(),
+      filter: $("#reportFilter").value.trim(),
+      createdAt: new Date().toISOString()
+    };
+    if (!report.name) throw new Error("Report name is required.");
+    ensureObject(report.object);
+    if (report.groupBy && !fieldExists(report.object, report.groupBy)) throw new Error(`Group field ${report.groupBy} does not exist on ${report.object}.`);
+    state.org.reports.push(report);
+    saveState();
+    renderAll();
+    setFeedback(`Created report ${report.name}.`, "success");
+  } catch (err) {
+    setFeedback(err.message, "error");
+    addError("Report Error", err.message);
+  }
+}
+
+function createDashboardFromForm() {
+  try {
+    const name = prompt("Dashboard name:", dashboardNameSuggestion());
+    if (!name) return;
+    const reportName = $("#reportName").value.trim();
+    if (!reportName) throw new Error("Create or enter the source report name first.");
+    if (!state.org.reports.some(r => normalize(r.name) === normalize(reportName))) throw new Error(`Report ${reportName} not found. Create the report before the dashboard.`);
+    state.org.dashboards.push({ name, reportName, chartType: "bar", createdAt: new Date().toISOString() });
+    saveState();
+    renderAll();
+    setFeedback(`Created dashboard ${name}.`, "success");
+  } catch (err) {
+    setFeedback(err.message, "error");
+    addError("Dashboard Error", err.message);
+  }
+}
+
+function dashboardNameSuggestion() {
+  const lesson = currentLesson();
+  if (lesson?.task?.action === "createDashboard") return lesson.task.name;
+  return "Sales Dashboard";
+}
+
+function createFlowFromForm() {
+  try {
+    const flow = {
+      name: $("#flowName").value.trim(),
+      object: $("#flowObject").value,
+      trigger: $("#flowTrigger").value,
+      condition: $("#flowCondition").value.trim(),
+      updateField: $("#flowUpdateField").value.trim(),
+      updateValue: $("#flowUpdateValue").value.trim(),
+      createdAt: new Date().toISOString()
+    };
+    if (!flow.name || !flow.object || !flow.updateField) throw new Error("Flow name, object, and update field are required.");
+    ensureObject(flow.object);
+    state.org.flows.push(flow);
+    saveState();
+    renderAll();
+    setFeedback(`Created flow ${flow.name}.`, "success");
+  } catch (err) {
+    setFeedback(err.message, "error");
+    addError("Flow Error", err.message);
+  }
+}
+
+function checkCurrentLesson() {
+  const lesson = currentLesson();
+  try {
+    const result = validateLesson(lesson);
+    if (!result.ok) throw new Error(result.message);
+    if (!state.completed.includes(lesson.id)) {
+      state.completed.push(lesson.id);
+      state.xp += lesson.xp;
+      state.streak += 1;
+      const newBadges = checkBadges(true);
+      saveState();
+      renderAll();
+      const badgeMsg = newBadges.length ? ` New badge${newBadges.length > 1 ? "s" : ""}: ${newBadges.map(b => b.name).join(", ")}.` : "";
+      setFeedback(`Correct. ${lesson.title} completed and ${lesson.xp} XP earned.${badgeMsg}`, "success");
+    } else {
+      setFeedback(`Correct. You already completed this lesson, so no extra XP was added.`, "success");
+    }
+  } catch (err) {
+    state.streak = 0;
+    saveState();
+    renderStats();
+    setFeedback(`${err.message} Coach tip: ${lesson.hint}`, "error");
+    addError(`${lesson.id} Check Failed`, err.message);
+  }
+}
+
+function validateLesson(lesson) {
+  if (!lesson) return { ok: false, message: "No lesson selected." };
+  const t = lesson.task;
+  switch (t.action) {
+    case "createRecord":
+      return findRecord(t.object, t.fields) ? ok() : fail(`I could not find a ${t.object} record with ${formatCriteria(t.fields)}.`);
+    case "updateRecord": {
+      const rec = findRecord(t.object, t.find);
+      if (!rec) return fail(`I could not find the ${t.object} record to update using ${formatCriteria(t.find)}.`);
+      return matchesFields(rec, t.updates) ? ok() : fail(`The ${t.object} record exists, but it does not have the required update: ${formatCriteria(t.updates)}.`);
+    }
+    case "importRecords": {
+      const allFound = t.records.every(row => findRecord(t.object, row));
+      return allFound ? ok() : fail(`One or more imported ${t.object} records are missing. Expected ${t.records.map(r => r.Name || JSON.stringify(r)).join(", ")}.`);
+    }
+    case "createObject":
+      return state.org.schema[t.apiName] ? ok() : fail(`Custom object ${t.apiName} was not found in Setup.`);
+    case "createField":
+      return state.org.schema[t.object]?.fields?.[t.fieldName] && normalize(state.org.schema[t.object].fields[t.fieldName]) === normalize(t.type)
+        ? ok() : fail(`Field ${t.fieldName} with type ${t.type} was not found on ${t.object}.`);
+    case "createValidationRule": {
+      const found = state.org.validationRules.find(r => r.object === t.object && normalize(r.name) === normalize(t.name) && (r.formula || "").includes(t.formulaContains));
+      return found ? ok() : fail(`Validation rule ${t.name} on ${t.object} with formula containing ${t.formulaContains} was not found.`);
+    }
+    case "createRelationship": {
+      const found = state.org.relationships.find(r => r.childObject === t.childObject && r.parentObject === t.parentObject && r.fieldName === t.fieldName);
+      return found ? ok() : fail(`Relationship ${t.fieldName} from ${t.childObject} to ${t.parentObject} was not found.`);
+    }
+    case "createPermissionSet": {
+      const found = state.org.permissionSets.find(p => normalize(p.name) === normalize(t.name) && normalize(p.object) === normalize(t.object) && normalize(p.permission) === normalize(t.permission));
+      return found ? ok() : fail(`Permission set ${t.name} granting ${t.permission} on ${t.object} was not found.`);
+    }
+    case "createUser": {
+      const found = state.org.users.find(u => normalize(u.name) === normalize(t.name) && normalize(u.profile) === normalize(t.profile));
+      return found ? ok() : fail(`User ${t.name} with profile ${t.profile} was not found.`);
+    }
+    case "createMetadata": {
+      const found = state.org.metadata.find(m => normalize(m.assetType) === normalize(t.assetType) && normalize(m.name) === normalize(t.name) && normalize(m.object) === normalize(t.object));
+      return found ? ok() : fail(`${t.assetType} asset ${t.name} for ${t.object} was not found.`);
+    }
+    case "createReport": {
+      const found = state.org.reports.find(r => normalize(r.name) === normalize(t.name) && normalize(r.object) === normalize(t.object) && (!t.groupBy || normalize(r.groupBy) === normalize(t.groupBy)));
+      return found ? ok() : fail(`Report ${t.name} on ${t.object}${t.groupBy ? ` grouped by ${t.groupBy}` : ""} was not found.`);
+    }
+    case "createDashboard": {
+      const found = state.org.dashboards.find(d => normalize(d.name) === normalize(t.name) && normalize(d.reportName) === normalize(t.reportName));
+      return found ? ok() : fail(`Dashboard ${t.name} based on report ${t.reportName} was not found.`);
+    }
+    case "createFlow": {
+      const found = state.org.flows.find(f => normalize(f.name) === normalize(t.name) && normalize(f.object) === normalize(t.object) && normalize(f.trigger) === normalize(t.trigger) && normalize(f.updateField) === normalize(t.updateField) && normalize(f.updateValue) === normalize(t.updateValue));
+      return found ? ok() : fail(`Flow ${t.name} on ${t.object} with ${t.trigger} updating ${t.updateField} to ${t.updateValue} was not found.`);
+    }
+    case "runSOQL": {
+      const found = state.org.soqlHistory.find(h => {
+        const p = h.parsed || {};
+        const query = h.query || "";
+        const fieldsOk = (t.fields || []).every(f => (p.fields || []).map(normalize).includes(normalize(f)));
+        const objectOk = normalize(p.object) === normalize(t.object);
+        const whereOk = !t.whereContains || normalize(query).includes(normalize(t.whereContains));
+        const orderOk = !t.orderBy || normalize(p.orderBy) === normalize(t.orderBy);
+        const limitOk = !t.limit || Number(p.limit) === Number(t.limit);
+        return fieldsOk && objectOk && whereOk && orderOk && limitOk;
+      });
+      return found ? ok() : fail(`Run the expected SOQL query against ${t.object}. Check selected fields, WHERE, ORDER BY, and LIMIT requirements.`);
+    }
+    default:
+      return fail(`No validator exists for task action ${t.action}.`);
+  }
+}
+
+function ok() { return { ok: true }; }
+function fail(message) { return { ok: false, message }; }
+
+function checkBadges(collectNew) {
+  const newBadges = [];
+  for (const rule of badgeRules) {
+    if (!state.badges.includes(rule.id) && rule.test(state)) {
+      state.badges.push(rule.id);
+      if (collectNew) newBadges.push(rule);
+    }
+  }
+  saveState();
+  return newBadges;
+}
+
+function countCompletedTracks(s, tracks) {
+  return s.completed.filter(id => tracks.includes(lessonById(id)?.track)).length;
+}
+
+function fillDemoForLesson() {
+  const lesson = currentLesson();
+  if (!lesson) return;
+  const t = lesson.task;
+  if (t.action === "createRecord") {
+    openTab("records");
+    $("#recordAction").value = "create";
+    $("#recordObject").value = t.object;
+    $("#recordJson").value = JSON.stringify(t.fields, null, 2);
+    toggleUpdateFields();
+  } else if (t.action === "updateRecord") {
+    openTab("records");
+    $("#recordAction").value = "update";
+    $("#recordObject").value = t.object;
+    const [findField, findValue] = Object.entries(t.find)[0];
+    $("#findField").value = findField;
+    $("#findValue").value = findValue;
+    $("#recordJson").value = JSON.stringify(t.updates, null, 2);
+    toggleUpdateFields();
+  } else if (t.action === "importRecords") {
+    openTab("records");
+    $("#recordAction").value = "import";
+    $("#recordObject").value = t.object;
+    $("#recordJson").value = JSON.stringify(t.records, null, 2);
+    toggleUpdateFields();
+  } else if (["createObject", "createField", "createValidationRule", "createRelationship", "createPermissionSet", "createUser", "createMetadata"].includes(t.action)) {
+    openTab("setup");
+    $("#setupAction").value = t.action;
+    if (t.object && objectNames().includes(t.object)) $("#setupObject").value = t.object;
+    if (t.childObject && objectNames().includes(t.childObject)) $("#setupObject").value = t.childObject;
+    $("#setupName").value = t.apiName || t.fieldName || t.name || "";
+    $("#setupKind").value = t.type || t.assetType || t.permission || t.profile || "";
+    const cfg = {};
+    if (t.label) cfg.label = t.label;
+    if (t.type) cfg.type = t.type;
+    if (t.formulaContains) cfg.formula = t.formulaContains;
+    if (t.parentObject) cfg.parentObject = t.parentObject;
+    if (t.object) cfg.object = t.object;
+    if (t.permission) cfg.permission = t.permission;
+    if (t.profile) cfg.profile = t.profile;
+    if (t.assetType) cfg.assetType = t.assetType;
+    $("#setupJson").value = JSON.stringify(cfg, null, 2);
+  } else if (t.action === "createReport") {
+    openTab("reports");
+    $("#reportName").value = t.name;
+    $("#reportObject").value = t.object;
+    $("#reportGroup").value = t.groupBy || "";
+    $("#reportFilter").value = "";
+  } else if (t.action === "createDashboard") {
+    openTab("reports");
+    $("#reportName").value = t.reportName;
+    setFeedback(`Create dashboard named ${t.name}. Make sure the source report ${t.reportName} already exists.`, "info");
+  } else if (t.action === "createFlow") {
+    openTab("automation");
+    $("#flowName").value = t.name;
+    $("#flowObject").value = t.object;
+    $("#flowTrigger").value = t.trigger;
+    $("#flowCondition").value = t.name.includes("High") ? "Amount > 50000" : "";
+    $("#flowUpdateField").value = t.updateField;
+    $("#flowUpdateValue").value = t.updateValue;
+  } else if (t.action === "runSOQL") {
+    openTab("soql");
+    $("#soqlEditor").value = t.demo || lesson.demo || "SELECT Name FROM Account";
+  }
+  setFeedback(`Correct example loaded. Run the action, then check the lesson.`, "info");
+}
+
+function openTab(id) {
+  $$(".tab").forEach(btn => btn.classList.toggle("active", btn.dataset.tab === id));
+  $$(".tab-page").forEach(page => page.classList.toggle("active", page.id === id));
+}
+
+function toggleUpdateFields() {
+  const show = ["update", "delete"].includes($("#recordAction").value);
+  $$(".update-field").forEach(el => el.style.display = show ? "grid" : "none");
+}
+
+function renderDataPreview() {
+  const object = $("#recordObject")?.value || objectNames()[0];
+  if (!object) return;
+  const rows = state.org.records[object] || [];
+  $("#dataPreview").innerHTML = `<h4>${escapeHtml(object)} Records</h4>${renderTable(rows.slice(-25))}`;
+}
+
+function renderSetupPreview() {
+  const object = $("#setupObject")?.value || objectNames()[0];
+  if (!object) return;
+  const schema = state.org.schema[object] || { fields: {} };
+  $("#setupPreview").innerHTML = `<h4>${escapeHtml(object)} Fields</h4>${renderTable(Object.entries(schema.fields || {}).map(([field, type]) => ({ Field: field, Type: type })))}
+  <h4>Recent Metadata</h4>${renderTable(state.org.metadata.slice(-10))}`;
+}
+
+function renderReportPreview() {
+  $("#reportPreview").innerHTML = `<h4>Reports</h4>${renderTable(state.org.reports.slice(-15))}<h4>Dashboards</h4>${renderTable(state.org.dashboards.slice(-15))}`;
+}
+
+function renderFlowPreview() {
+  $("#flowPreview").innerHTML = renderTable(state.org.flows.slice(-15));
+}
+
+function renderTable(rows) {
+  if (!rows || !rows.length) return "<pre>No rows yet.</pre>";
+  const keys = [...new Set(rows.flatMap(row => Object.keys(row)))];
+  return `<table class="table"><thead><tr>${keys.map(k => `<th>${escapeHtml(k)}</th>`).join("")}</tr></thead><tbody>${rows.map(row => `<tr>${keys.map(k => `<td>${escapeHtml(displayValue(row[k]))}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+}
+
+function displayValue(value) {
+  if (value === undefined || value === null) return "";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>'"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" }[c]));
+}
+
+function saveAudioSettings() {
+  state.audio = {
+    mode: $("#audioMode").value,
+    elevenKey: $("#elevenKey").value.trim(),
+    elevenVoice: $("#elevenVoice").value.trim() || "EXAVITQu4vr4xnSDxMaL",
+    elevenModel: $("#elevenModel").value.trim() || "eleven_multilingual_v2"
+  };
+  saveState();
+  setFeedback("Audio settings saved in this browser.", "success");
+}
+
+async function speakCurrentLesson() {
+  const lesson = currentLesson();
+  const text = `${lesson.title}. ${lesson.concept}. Steps: ${lesson.steps.join(". ")}. Coach hint: ${lesson.hint}`;
+  if (state.audio.mode === "elevenlabs") {
+    await speakWithElevenLabs(text);
+  } else {
+    speakWithBrowser(text);
+  }
+}
+
+function speakWithBrowser(text) {
+  if (!window.speechSynthesis) {
+    setFeedback("Browser speech is not available in this browser. Try ElevenLabs mode.", "error");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.rate = 0.95;
+  msg.pitch = 1;
+  window.speechSynthesis.speak(msg);
+  setFeedback("Reading the lesson with browser speech.", "success");
+}
+
+async function speakWithElevenLabs(text) {
+  try {
+    if (!state.audio.elevenKey) throw new Error("Add your ElevenLabs API key in the Audio tab first.");
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(state.audio.elevenVoice)}`, {
+      method: "POST",
+      headers: {
+        "Accept": "audio/mpeg",
+        "Content-Type": "application/json",
+        "xi-api-key": state.audio.elevenKey
+      },
+      body: JSON.stringify({
+        text,
+        model_id: state.audio.elevenModel,
+        voice_settings: { stability: 0.45, similarity_boost: 0.75 }
+      })
+    });
+    if (!response.ok) throw new Error(`ElevenLabs request failed: ${response.status}. Check API key, voice ID, and account permissions.`);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const player = $("#audioPlayer");
+    player.src = url;
+    await player.play();
+    setFeedback("Reading the lesson with ElevenLabs audio.", "success");
+  } catch (err) {
+    setFeedback(err.message, "error");
+    addError("Audio Error", err.message);
+  }
+}
+
+// Keep previews synced when object selectors change.
+document.addEventListener("change", event => {
+  if (["recordObject", "setupObject"].includes(event.target.id)) {
+    renderDataPreview();
+    renderSetupPreview();
+  }
+});
+
+init();
+toggleUpdateFields();
+
+  </script>
+</body>
+</html>

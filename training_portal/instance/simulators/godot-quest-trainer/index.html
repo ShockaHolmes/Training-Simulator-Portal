@@ -1,0 +1,3492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Godot Quest Trainer - HTML Version</title>
+  <style>
+:root {
+  --bg: #08111f;
+  --panel: #101d32;
+  --panel-2: #13253d;
+  --text: #edf6ff;
+  --muted: #a9bdd3;
+  --brand: #43d3ff;
+  --brand-2: #89ffcb;
+  --warn: #ffca6a;
+  --danger: #ff6b88;
+  --success: #65e58e;
+  --line: rgba(255, 255, 255, 0.11);
+  --shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(67, 211, 255, 0.20), transparent 28rem),
+    radial-gradient(circle at bottom right, rgba(137, 255, 203, 0.13), transparent 26rem),
+    var(--bg);
+}
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 310px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  border-right: 1px solid var(--line);
+  padding: 22px;
+  background: rgba(7, 14, 26, 0.82);
+  backdrop-filter: blur(22px);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.brand { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+.logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color: #062033;
+  box-shadow: 0 14px 38px rgba(67, 211, 255, 0.28);
+}
+.brand h1 { margin: 0; font-size: 1.25rem; }
+.brand p, .player-card span, .small-stats, .hero p, #lessonSummary, .audio-panel p { color: var(--muted); }
+.brand p { margin: 3px 0 0; font-size: 0.9rem; }
+
+.player-card, .progress-panel, .lesson-list-card, .trainer-card {
+  background: rgba(16, 29, 50, 0.84);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+.player-card { padding: 16px; display: flex; align-items: center; gap: 14px; }
+.avatar { width: 50px; height: 50px; border-radius: 16px; display: grid; place-items: center; background: var(--panel-2); font-size: 1.6rem; }
+.player-card strong, .player-card span { display: block; }
+
+.progress-panel { padding: 16px; margin: 18px 0; }
+.progress-label, .small-stats, .card-title-row, .lesson-header, .editor-toolbar, .preview-toolbar, .button-row, .hero-actions, .lesson-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.progress-track { height: 10px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; margin: 10px 0; }
+#progressFill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--brand), var(--brand-2)); transition: width 0.25s ease; }
+.small-stats { font-size: 0.85rem; }
+
+.sidebar h2 { font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 22px 0 12px; }
+.badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.badge {
+  min-height: 74px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.04);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 8px;
+  color: var(--muted);
+  filter: grayscale(1);
+}
+.badge.earned { color: var(--text); filter: none; background: rgba(67, 211, 255, 0.12); border-color: rgba(67, 211, 255, 0.38); }
+.badge span { display: block; font-size: 1.45rem; }
+.badge small { font-size: 0.68rem; }
+
+.btn {
+  border: 0;
+  color: #061420;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-weight: 800;
+  box-shadow: 0 12px 34px rgba(67, 211, 255, 0.16);
+}
+.btn.ghost { background: rgba(255,255,255,0.06); color: var(--text); box-shadow: none; border: 1px solid var(--line); }
+.btn.success { background: linear-gradient(135deg, #5bf28b, #c8ff78); }
+.btn.full { width: 100%; margin-bottom: 10px; }
+.btn.tiny { padding: 7px 10px; border-radius: 10px; font-size: 0.82rem; }
+
+.main { padding: 26px; overflow: hidden; }
+.hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.eyebrow { text-transform: uppercase; letter-spacing: 0.13em; font-size: 0.78rem; margin: 0 0 8px; color: var(--brand) !important; font-weight: 800; }
+.hero h2 { margin: 0; max-width: 830px; font-size: clamp(1.4rem, 2.8vw, 2.65rem); line-height: 1.06; }
+.hero-actions input, .hero-actions select, .audio-grid input {
+  min-height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  color: var(--text);
+  background: rgba(255,255,255,0.07);
+  padding: 0 13px;
+  outline: none;
+}
+.hero-actions input { width: 240px; }
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.lesson-list-card, .trainer-card { padding: 18px; }
+.lesson-list { display: grid; gap: 10px; max-height: calc(100vh - 170px); overflow-y: auto; padding-right: 4px; }
+.lesson-item {
+  text-align: left;
+  width: 100%;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 12px;
+}
+.lesson-item:hover, .lesson-item.active { border-color: rgba(67, 211, 255, 0.62); background: rgba(67, 211, 255, 0.11); }
+.lesson-item.completed { border-color: rgba(101, 229, 142, 0.44); }
+.lesson-item .meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.lesson-item strong { display: block; line-height: 1.2; }
+.lesson-item small { color: var(--muted); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: rgba(67, 211, 255, 0.15);
+  border: 1px solid rgba(67, 211, 255, 0.28);
+  color: var(--brand);
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-right: 5px;
+}
+.pill.muted { color: var(--muted); background: rgba(255,255,255,0.05); border-color: var(--line); }
+.lesson-header { align-items: start; margin-bottom: 16px; }
+.lesson-header h3 { margin: 10px 0 6px; font-size: 1.7rem; }
+.lesson-nav { justify-content: flex-end; }
+.steps-box { background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 18px; padding: 14px 18px; margin-bottom: 16px; }
+.steps-box h4 { margin: 0 0 10px; }
+.steps-box li { margin-bottom: 8px; color: #d8e7f7; }
+
+.editor-grid { display: grid; grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 1.05fr); gap: 16px; }
+.editor-panel, .preview-panel, .audio-panel {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(4, 10, 20, 0.35);
+  overflow: hidden;
+}
+.editor-toolbar, .preview-toolbar { padding: 12px 14px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.04); }
+#codeEditor {
+  width: 100%;
+  min-height: 330px;
+  resize: vertical;
+  background: #06111f;
+  color: #d7f4ff;
+  border: 0;
+  outline: 0;
+  padding: 16px;
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  line-height: 1.52;
+  tab-size: 4;
+}
+.button-row { justify-content: flex-start; padding: 12px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.console {
+  margin: 0;
+  min-height: 110px;
+  max-height: 190px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  color: #d9ebff;
+  border-top: 1px solid var(--line);
+  padding: 13px;
+  background: #040a13;
+}
+.console.good { color: var(--success); }
+.console.bad { color: #ffd3db; }
+
+#previewCanvas { width: 100%; height: auto; display: block; background: linear-gradient(#132744, #07111f); }
+#fpsBadge { font-size: 0.75rem; padding: 5px 9px; border-radius: 999px; background: rgba(101, 229, 142, 0.15); color: var(--success); border: 1px solid rgba(101, 229, 142, 0.28); }
+.godot-panels { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
+.godot-panels > div { padding: 12px; min-height: 138px; }
+.godot-panels > div:first-child { border-right: 1px solid var(--line); }
+.godot-panels h5 { margin: 0 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+#sceneTree { margin: 0; padding-left: 18px; color: #d7e9fa; }
+#inspector { color: #d7e9fa; font-size: 0.9rem; display: grid; gap: 5px; }
+
+.audio-panel { margin-top: 16px; padding: 14px; }
+.audio-panel summary { cursor: pointer; font-weight: 800; }
+.audio-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin: 12px 0; }
+#lessonAudio { width: 100%; }
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  max-width: 360px;
+  padding: 14px 16px;
+  background: #06111f;
+  color: var(--text);
+  border: 1px solid rgba(67, 211, 255, 0.38);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  transition: 0.22s ease;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 1180px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { position: relative; height: auto; }
+  .content-grid, .editor-grid, .hero { grid-template-columns: 1fr; display: grid; }
+  .hero-actions { justify-content: stretch; flex-wrap: wrap; }
+  .hero-actions input, .hero-actions select { width: 100%; }
+}
+
+@media (max-width: 720px) {
+  .main, .sidebar { padding: 15px; }
+  .audio-grid, .godot-panels { grid-template-columns: 1fr; }
+  .godot-panels > div:first-child { border-right: 0; border-bottom: 1px solid var(--line); }
+}
+
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">GQ</div>
+        <div>
+          <h1>Godot Quest</h1>
+          <p>Interactive Godot Trainer</p>
+        </div>
+      </div>
+
+      <section class="player-card">
+        <div class="avatar">🧙🏾‍♂️</div>
+        <div>
+          <strong id="playerTitle">Scene Apprentice</strong>
+          <span id="xpText">0 XP</span>
+        </div>
+      </section>
+
+      <section class="progress-panel">
+        <div class="progress-label">
+          <span>Training Progress</span>
+          <strong id="progressPercent">0%</strong>
+        </div>
+        <div class="progress-track"><div id="progressFill"></div></div>
+        <div class="small-stats">
+          <span><b id="completedCount">0</b>/100 lessons</span>
+          <span><b id="badgeCount">0</b> badges</span>
+        </div>
+      </section>
+
+      <section>
+        <h2>Badges</h2>
+        <div id="badgeGrid" class="badge-grid"></div>
+      </section>
+
+      <section>
+        <h2>Session Tools</h2>
+        <button id="newSessionBtn" class="btn full">🎲 New Mixed Session</button>
+        <button id="resetBtn" class="btn full ghost">Reset Progress</button>
+        <button id="certificateBtn" class="btn full ghost">Create Certificate</button>
+      </section>
+    </aside>
+
+    <main class="main">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Learn Godot by building small playable systems</p>
+          <h2>100 Godot lessons with code checks, guided fixes, badges, and a live preview.</h2>
+        </div>
+        <div class="hero-actions">
+          <select id="difficultyFilter" aria-label="Difficulty filter">
+            <option value="all">All Difficulty</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+            <option value="Boss Level">Boss Level</option>
+          </select>
+          <input id="searchInput" placeholder="Search lessons, e.g. signals" />
+        </div>
+      </header>
+
+      <div class="content-grid">
+        <section class="lesson-list-card">
+          <div class="card-title-row">
+            <h3>Lesson Path</h3>
+            <span id="sessionLabel">Mixed Session</span>
+          </div>
+          <div id="lessonList" class="lesson-list"></div>
+        </section>
+
+        <section class="trainer-card">
+          <div class="lesson-header">
+            <div>
+              <div class="meta">
+                <span id="lessonDifficulty" class="pill">Beginner</span>
+                <span id="lessonCategory" class="pill muted">Scene Basics</span>
+              </div>
+              <h2 id="lessonTitle">Loading lesson...</h2>
+              <p id="lessonSummary"></p>
+            </div>
+            <div class="lesson-nav">
+              <button id="prevBtn" class="btn ghost">← Previous</button>
+              <button id="nextBtn" class="btn">Next →</button>
+            </div>
+          </div>
+
+          <div class="training-grid">
+            <section class="steps-panel">
+              <h3>Step-by-Step Instructions</h3>
+              <ol id="lessonSteps"></ol>
+
+              <div class="audio-panel">
+                <h3>ElevenLabs Audio Reader</h3>
+                <p>Paste your ElevenLabs API key and voice ID to read the lesson aloud. For public websites, use a backend proxy so your key stays private.</p>
+                <input id="elevenKey" type="password" placeholder="ElevenLabs API key" autocomplete="off" />
+                <input id="voiceId" placeholder="Voice ID" />
+                <button id="readLessonBtn" class="btn full">🔊 Read Lesson</button>
+                <audio id="lessonAudio" controls></audio>
+              </div>
+            </section>
+
+            <section class="editor-panel">
+              <div class="editor-toolbar">
+                <h3>GDScript Test Environment</h3>
+                <div>
+                  <button id="formatBtn" class="btn tiny ghost">Format</button>
+                  <button id="copyBtn" class="btn tiny ghost">Copy</button>
+                </div>
+              </div>
+              <textarea id="codeEditor" spellcheck="false"></textarea>
+              <div class="button-row">
+                <button id="runBtn" class="btn success">▶ Run / Check</button>
+                <button id="hintBtn" class="btn ghost">Hint</button>
+                <button id="solutionBtn" class="btn ghost">Show Solution</button>
+              </div>
+              <pre id="consoleOutput" class="console">Ready.</pre>
+            </section>
+
+            <section class="preview-panel">
+              <div class="preview-toolbar">
+                <h3>Godot-Style Preview</h3>
+                <span class="pill muted">Canvas Simulator</span>
+              </div>
+              <canvas id="previewCanvas" width="640" height="390"></canvas>
+              <div class="godot-panels">
+                <div>
+                  <h4>Scene Tree</h4>
+                  <ul id="sceneTree"></ul>
+                </div>
+                <div>
+                  <h4>Inspector</h4>
+                  <div id="inspector"></div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script>
+window.LESSONS = [
+  {
+    "id": 1,
+    "title": "Create Your First Node2D Scene",
+    "category": "Scene Basics",
+    "difficulty": "Beginner",
+    "summary": "Learn how Godot builds games from nodes inside scenes.",
+    "steps": [
+      "Read the goal: Learn how Godot builds games from nodes inside scenes.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nfunc _ready():\n    print(\"My first Godot scene is running!\")\n",
+    "checks": [
+      "extends Node2D",
+      "func _ready",
+      "print"
+    ],
+    "hint": "Your code should include: extends Node2D, func _ready, print. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "scene_intro",
+    "badge": "Explorer",
+    "badgeIcon": "\ud83e\udded"
+  },
+  {
+    "id": 2,
+    "title": "Rename a Player Node",
+    "category": "Scene Basics",
+    "difficulty": "Beginner",
+    "summary": "Practice clean node naming so your scene tree stays readable.",
+    "steps": [
+      "Read the goal: Practice clean node naming so your scene tree stays readable.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\n@onready var player = $Player\n\nfunc _ready():\n    player.name = \"HeroPlayer\"\n    print(player.name)\n",
+    "checks": [
+      "@onready",
+      "$Player",
+      "name"
+    ],
+    "hint": "Your code should include: @onready, $Player, name. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "scene_tree",
+    "badge": "Explorer",
+    "badgeIcon": "\ud83e\udded"
+  },
+  {
+    "id": 3,
+    "title": "Print a Startup Message",
+    "category": "GDScript Basics",
+    "difficulty": "Beginner",
+    "summary": "Use _ready() to run code when a scene starts.",
+    "steps": [
+      "Read the goal: Use _ready() to run code when a scene starts.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nfunc _ready():\n    print(\"Godot Quest lesson started!\")\n",
+    "checks": [
+      "func _ready",
+      "print"
+    ],
+    "hint": "Your code should include: func _ready, print. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "console",
+    "badge": "GDScript Rookie",
+    "badgeIcon": "\ud83d\udcdc"
+  },
+  {
+    "id": 4,
+    "title": "Create Variables for Health and Speed",
+    "category": "GDScript Basics",
+    "difficulty": "Beginner",
+    "summary": "Store player stats in variables.",
+    "steps": [
+      "Read the goal: Store player stats in variables.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nvar health = 100\nvar speed = 220\nconst MAX_HEALTH = 100\nconst WALK_SPEED = 220\n\nfunc _ready():\n    print(\"Health:\", health, \" Speed:\", speed)\n",
+    "checks": [
+      "var health",
+      "var speed",
+      "func _ready"
+    ],
+    "hint": "Your code should include: var health, var speed, func _ready. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "stats",
+    "badge": "GDScript Rookie",
+    "badgeIcon": "\ud83d\udcdc"
+  },
+  {
+    "id": 5,
+    "title": "Use Constants for Game Rules",
+    "category": "GDScript Basics",
+    "difficulty": "Beginner",
+    "summary": "Create constants that should not change during play.",
+    "steps": [
+      "Read the goal: Create constants that should not change during play.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nvar health = 100\nvar speed = 220\nconst MAX_HEALTH = 100\nconst WALK_SPEED = 220\n\nfunc _ready():\n    print(\"Health:\", health, \" Speed:\", speed)\n",
+    "checks": [
+      "const MAX_HEALTH",
+      "const WALK_SPEED"
+    ],
+    "hint": "Your code should include: const MAX_HEALTH, const WALK_SPEED. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "stats",
+    "badge": "GDScript Rookie",
+    "badgeIcon": "\ud83d\udcdc"
+  },
+  {
+    "id": 6,
+    "title": "Write a Custom Function",
+    "category": "GDScript Basics",
+    "difficulty": "Beginner",
+    "summary": "Create a reusable function for simple game logic.",
+    "steps": [
+      "Read the goal: Create a reusable function for simple game logic.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nfunc _ready():\n    print(\"Godot Quest lesson started!\")\n",
+    "checks": [
+      "func add_score",
+      "score +=",
+      "print"
+    ],
+    "hint": "Your code should include: func add_score, score +=, print. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "console",
+    "badge": "GDScript Rookie",
+    "badgeIcon": "\ud83d\udcdc"
+  },
+  {
+    "id": 7,
+    "title": "Use If Statements for Win Checks",
+    "category": "GDScript Basics",
+    "difficulty": "Beginner",
+    "summary": "Control game flow using conditions.",
+    "steps": [
+      "Read the goal: Control game flow using conditions.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nvar score = 10\n\nfunc _ready():\n    if score >= 10:\n        print(\"You win!\")\n",
+    "checks": [
+      "if score >=",
+      "print"
+    ],
+    "hint": "Your code should include: if score >=, print. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "win_check",
+    "badge": "GDScript Rookie",
+    "badgeIcon": "\ud83d\udcdc"
+  },
+  {
+    "id": 8,
+    "title": "Loop Through Coins",
+    "category": "GDScript Basics",
+    "difficulty": "Beginner",
+    "summary": "Use a loop to count collectibles.",
+    "steps": [
+      "Read the goal: Use a loop to count collectibles.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nvar coins = [\"gold\", \"silver\", \"ruby\"]\n\nfunc _ready():\n    for coin in coins:\n        print(\"Collected:\", coin)\n",
+    "checks": [
+      "for coin in",
+      "coins",
+      "print"
+    ],
+    "hint": "Your code should include: for coin in, coins, print. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "coins",
+    "badge": "GDScript Rookie",
+    "badgeIcon": "\ud83d\udcdc"
+  },
+  {
+    "id": 9,
+    "title": "Move a Sprite2D with Position",
+    "category": "Nodes",
+    "difficulty": "Beginner",
+    "summary": "Change a node's position from code.",
+    "steps": [
+      "Read the goal: Change a node's position from code.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Sprite2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Sprite2D\n\nfunc _process(delta):\n    position.x += 120 * delta\n",
+    "checks": [
+      "position.x",
+      "+=",
+      "func _process"
+    ],
+    "hint": "Your code should include: position.x, +=, func _process. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "sprite_move",
+    "badge": "2D Pilot",
+    "badgeIcon": "\ud83d\udef8"
+  },
+  {
+    "id": 10,
+    "title": "Rotate a Sprite2D Over Time",
+    "category": "Nodes",
+    "difficulty": "Beginner",
+    "summary": "Use delta to make frame-rate independent motion.",
+    "steps": [
+      "Read the goal: Use delta to make frame-rate independent motion.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Sprite2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Sprite2D\n\nfunc _process(delta):\n    rotation += 2.0 * delta\n",
+    "checks": [
+      "rotation",
+      "delta",
+      "func _process"
+    ],
+    "hint": "Your code should include: rotation, delta, func _process. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "rotate",
+    "badge": "2D Pilot",
+    "badgeIcon": "\ud83d\udef8"
+  },
+  {
+    "id": 11,
+    "title": "Read Keyboard Input",
+    "category": "Input",
+    "difficulty": "Beginner",
+    "summary": "Use Input actions to move a player.",
+    "steps": [
+      "Read the goal: Use Input actions to move a player.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use Input actions like ui_left, ui_right, ui_accept, or Input.get_vector where needed.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nvar speed = 220\n\nfunc _process(delta):\n    if Input.is_action_pressed(\"ui_right\"):\n        position.x += speed * delta\n    if Input.is_action_pressed(\"ui_left\"):\n        position.x -= speed * delta\n",
+    "checks": [
+      "Input.is_action_pressed",
+      "ui_right",
+      "ui_left"
+    ],
+    "hint": "Your code should include: Input.is_action_pressed, ui_right, ui_left. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "input_move",
+    "badge": "Input Scout",
+    "badgeIcon": "\ud83c\udfae"
+  },
+  {
+    "id": 12,
+    "title": "Create a Movement Vector",
+    "category": "Input",
+    "difficulty": "Beginner",
+    "summary": "Combine x and y input into a Vector2.",
+    "steps": [
+      "Read the goal: Combine x and y input into a Vector2.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use Input actions like ui_left, ui_right, ui_accept, or Input.get_vector where needed.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nvar speed = 240\n\nfunc _physics_process(delta):\n    var direction = Vector2.ZERO\n    if Input.is_action_pressed(\"ui_right\"):\n        direction.x += 1\n    if Input.is_action_pressed(\"ui_left\"):\n        direction.x -= 1\n    velocity = direction.normalized() * speed\n    move_and_slide()\n",
+    "checks": [
+      "Vector2.ZERO",
+      "normalized",
+      "Input.is_action_pressed"
+    ],
+    "hint": "Your code should include: Vector2.ZERO, normalized, Input.is_action_pressed. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "input_vector",
+    "badge": "Input Scout",
+    "badgeIcon": "\ud83c\udfae"
+  },
+  {
+    "id": 13,
+    "title": "Flip a Sprite When Moving",
+    "category": "Input",
+    "difficulty": "Beginner",
+    "summary": "Face the player toward movement direction.",
+    "steps": [
+      "Read the goal: Face the player toward movement direction.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use Input actions like ui_left, ui_right, ui_accept, or Input.get_vector where needed.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\n@onready var sprite = $Sprite2D\n\nfunc _physics_process(delta):\n    if velocity.x != 0:\n        sprite.flip_h = velocity.x < 0\n",
+    "checks": [
+      "flip_h",
+      "velocity.x"
+    ],
+    "hint": "Your code should include: flip_h, velocity.x. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "sprite_flip",
+    "badge": "Input Scout",
+    "badgeIcon": "\ud83c\udfae"
+  },
+  {
+    "id": 14,
+    "title": "Update a Label with Score",
+    "category": "UI",
+    "difficulty": "Beginner",
+    "summary": "Connect gameplay data to the user interface.",
+    "steps": [
+      "Read the goal: Connect gameplay data to the user interface.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Update Control nodes such as Labels, Buttons, Panels, ProgressBars, or menu screens.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CanvasLayer\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CanvasLayer\n\nvar score = 5\n\nfunc _ready():\n    $ScoreLabel.text = \"Score: \" + str(score)\n",
+    "checks": [
+      "$ScoreLabel.text",
+      "str(score)"
+    ],
+    "hint": "Your code should include: $ScoreLabel.text, str(score). Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "ui_label",
+    "badge": "UI Builder",
+    "badgeIcon": "\ud83e\udde9"
+  },
+  {
+    "id": 15,
+    "title": "Make a Start Button Work",
+    "category": "UI",
+    "difficulty": "Beginner",
+    "summary": "Use button_pressed logic to start a game.",
+    "steps": [
+      "Read the goal: Use button_pressed logic to start a game.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Update Control nodes such as Labels, Buttons, Panels, ProgressBars, or menu screens.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Control\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Control\n\nvar game_started = false\n\nfunc _on_start_button_pressed():\n    game_started = true\n    print(\"Game started!\")\n",
+    "checks": [
+      "func _on_start_button_pressed",
+      "game_started = true"
+    ],
+    "hint": "Your code should include: func _on_start_button_pressed, game_started = true. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "button",
+    "badge": "UI Builder",
+    "badgeIcon": "\ud83e\udde9"
+  },
+  {
+    "id": 16,
+    "title": "React to a Button Signal",
+    "category": "Signals",
+    "difficulty": "Beginner",
+    "summary": "Use a signal callback to respond to a UI event.",
+    "steps": [
+      "Read the goal: Use a signal callback to respond to a UI event.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Create, emit, connect, or respond to a signal callback.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Control\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Control\n\nfunc _on_button_pressed():\n    print(\"Button signal received.\")\n",
+    "checks": [
+      "func _on_button_pressed",
+      "print"
+    ],
+    "hint": "Your code should include: func _on_button_pressed, print. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "signal_button",
+    "badge": "Signal Spark",
+    "badgeIcon": "\u26a1"
+  },
+  {
+    "id": 17,
+    "title": "Instance a Coin Scene",
+    "category": "Scenes",
+    "difficulty": "Beginner",
+    "summary": "Spawn reusable scenes during gameplay.",
+    "steps": [
+      "Read the goal: Spawn reusable scenes during gameplay.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nvar CoinScene = preload(\"res://Coin.tscn\")\n\nfunc spawn_coin():\n    var coin = CoinScene.instantiate()\n    coin.position = Vector2(180, 120)\n    add_child(coin)\n",
+    "checks": [
+      "preload",
+      "instantiate",
+      "add_child"
+    ],
+    "hint": "Your code should include: preload, instantiate, add_child. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "spawn_coin",
+    "badge": "Scene Builder",
+    "badgeIcon": "\ud83c\udfac"
+  },
+  {
+    "id": 18,
+    "title": "Remove a Collected Coin",
+    "category": "Scenes",
+    "difficulty": "Beginner",
+    "summary": "Use queue_free() to remove a node safely.",
+    "steps": [
+      "Read the goal: Use queue_free() to remove a node safely.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Area2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Area2D\n\nvar score = 0\n\nfunc collect_coin():\n    score += 1\n    queue_free()\n",
+    "checks": [
+      "queue_free",
+      "score +="
+    ],
+    "hint": "Your code should include: queue_free, score +=. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "collect_coin",
+    "badge": "Scene Builder",
+    "badgeIcon": "\ud83c\udfac"
+  },
+  {
+    "id": 19,
+    "title": "Create CharacterBody2D Velocity",
+    "category": "Physics",
+    "difficulty": "Beginner",
+    "summary": "Set up the basics for a controllable 2D character.",
+    "steps": [
+      "Read the goal: Set up the basics for a controllable 2D character.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use _physics_process(delta), velocity, and move_and_slide() for physics-safe movement.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nvar speed = 220\n\nfunc _physics_process(delta):\n    velocity.x = speed\n    move_and_slide()\n",
+    "checks": [
+      "extends CharacterBody2D",
+      "velocity",
+      "move_and_slide"
+    ],
+    "hint": "Your code should include: extends CharacterBody2D, velocity, move_and_slide. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "physics_body",
+    "badge": "Physics Wrangler",
+    "badgeIcon": "\ud83e\uddf2"
+  },
+  {
+    "id": 20,
+    "title": "Add Simple Gravity",
+    "category": "Physics",
+    "difficulty": "Beginner",
+    "summary": "Apply gravity every physics frame.",
+    "steps": [
+      "Read the goal: Apply gravity every physics frame.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use _physics_process(delta), velocity, and move_and_slide() for physics-safe movement.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nvar gravity = 980\n\nfunc _physics_process(delta):\n    velocity.y += gravity * delta\n    move_and_slide()\n",
+    "checks": [
+      "func _physics_process",
+      "velocity.y +=",
+      "move_and_slide"
+    ],
+    "hint": "Your code should include: func _physics_process, velocity.y +=, move_and_slide. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "gravity",
+    "badge": "Physics Wrangler",
+    "badgeIcon": "\ud83e\uddf2"
+  },
+  {
+    "id": 21,
+    "title": "Jump When On Floor",
+    "category": "Physics",
+    "difficulty": "Intermediate",
+    "summary": "Add platformer jumping with is_on_floor().",
+    "steps": [
+      "Read the goal: Add platformer jumping with is_on_floor().",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use _physics_process(delta), velocity, and move_and_slide() for physics-safe movement.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nvar gravity = 980\nvar jump_force = -420\n\nfunc _physics_process(delta):\n    velocity.y += gravity * delta\n    if Input.is_action_just_pressed(\"ui_accept\") and is_on_floor():\n        velocity.y = jump_force\n    move_and_slide()\n",
+    "checks": [
+      "is_on_floor",
+      "velocity.y",
+      "Input.is_action_just_pressed"
+    ],
+    "hint": "Your code should include: is_on_floor, velocity.y, Input.is_action_just_pressed. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "jump",
+    "badge": "Physics Wrangler",
+    "badgeIcon": "\ud83e\uddf2"
+  },
+  {
+    "id": 22,
+    "title": "Clamp Player Speed",
+    "category": "Physics",
+    "difficulty": "Intermediate",
+    "summary": "Prevent movement values from becoming too high.",
+    "steps": [
+      "Read the goal: Prevent movement values from becoming too high.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use _physics_process(delta), velocity, and move_and_slide() for physics-safe movement.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nfunc _physics_process(delta):\n    velocity.x = clamp(velocity.x, -250, 250)\n    move_and_slide()\n",
+    "checks": [
+      "clamp",
+      "velocity.x"
+    ],
+    "hint": "Your code should include: clamp, velocity.x. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "speed_clamp",
+    "badge": "Physics Wrangler",
+    "badgeIcon": "\ud83e\uddf2"
+  },
+  {
+    "id": 23,
+    "title": "Use Area2D for Pickup Detection",
+    "category": "Physics",
+    "difficulty": "Intermediate",
+    "summary": "Detect when a body enters a pickup zone.",
+    "steps": [
+      "Read the goal: Detect when a body enters a pickup zone.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use _physics_process(delta), velocity, and move_and_slide() for physics-safe movement.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Area2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Area2D\n\nfunc _on_body_entered(body):\n    print(\"Pickup touched by\", body.name)\n    queue_free()\n",
+    "checks": [
+      "func _on_body_entered",
+      "body",
+      "queue_free"
+    ],
+    "hint": "Your code should include: func _on_body_entered, body, queue_free. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "area_pickup",
+    "badge": "Physics Wrangler",
+    "badgeIcon": "\ud83e\uddf2"
+  },
+  {
+    "id": 24,
+    "title": "Damage the Player on Contact",
+    "category": "Physics",
+    "difficulty": "Intermediate",
+    "summary": "Subtract health when an enemy touches the player.",
+    "steps": [
+      "Read the goal: Subtract health when an enemy touches the player.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use _physics_process(delta), velocity, and move_and_slide() for physics-safe movement.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nvar health = 100\n\nfunc take_damage(amount):\n    health -= amount\n    print(\"Health now\", health)\n",
+    "checks": [
+      "health -=",
+      "func take_damage"
+    ],
+    "hint": "Your code should include: health -=, func take_damage. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "damage",
+    "badge": "Combat Coder",
+    "badgeIcon": "\u2694\ufe0f"
+  },
+  {
+    "id": 25,
+    "title": "Spawn Coins with a Timer",
+    "category": "Timers",
+    "difficulty": "Intermediate",
+    "summary": "Use a Timer signal to create repeating events.",
+    "steps": [
+      "Read the goal: Use a Timer signal to create repeating events.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nvar EnemyScene = preload(\"res://Enemy.tscn\")\n\nfunc _on_timer_timeout():\n    var enemy = EnemyScene.instantiate()\n    add_child(enemy)\n",
+    "checks": [
+      "func _on_timer_timeout",
+      "instantiate",
+      "add_child"
+    ],
+    "hint": "Your code should include: func _on_timer_timeout, instantiate, add_child. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "timer_spawn",
+    "badge": "Scene Builder",
+    "badgeIcon": "\ud83c\udfac"
+  },
+  {
+    "id": 26,
+    "title": "Create a Countdown Clock",
+    "category": "Timers",
+    "difficulty": "Intermediate",
+    "summary": "Build a timer-driven level clock.",
+    "steps": [
+      "Read the goal: Build a timer-driven level clock.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nvar time_left = 30\n\nfunc _ready():\n    $Timer.start()\n\nfunc _on_timer_timeout():\n    time_left -= 1\n    $TimeLabel.text = str(time_left)\n",
+    "checks": [
+      "time_left -=",
+      "$Timer.start",
+      "$TimeLabel.text"
+    ],
+    "hint": "Your code should include: time_left -=, $Timer.start, $TimeLabel.text. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "countdown",
+    "badge": "UI Builder",
+    "badgeIcon": "\ud83e\udde9"
+  },
+  {
+    "id": 27,
+    "title": "Create a Custom Signal",
+    "category": "Signals",
+    "difficulty": "Intermediate",
+    "summary": "Emit a message from one script to another.",
+    "steps": [
+      "Read the goal: Emit a message from one script to another.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Create, emit, connect, or respond to a signal callback.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nsignal health_changed(new_health)\nvar health = 100\n\nfunc take_damage(amount):\n    health -= amount\n    emit_signal(\"health_changed\", health)\n",
+    "checks": [
+      "signal health_changed",
+      "emit_signal",
+      "health"
+    ],
+    "hint": "Your code should include: signal health_changed, emit_signal, health. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "custom_signal",
+    "badge": "Signal Spark",
+    "badgeIcon": "\u26a1"
+  },
+  {
+    "id": 28,
+    "title": "Connect a Signal in Code",
+    "category": "Signals",
+    "difficulty": "Intermediate",
+    "summary": "Use Callable syntax to connect events.",
+    "steps": [
+      "Read the goal: Use Callable syntax to connect events.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Create, emit, connect, or respond to a signal callback.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nfunc _ready():\n    $Timer.timeout.connect(Callable(self, \"_on_timer_timeout\"))\n\nfunc _on_timer_timeout():\n    print(\"Connected in code.\")\n",
+    "checks": [
+      "connect",
+      "Callable",
+      "timeout"
+    ],
+    "hint": "Your code should include: connect, Callable, timeout. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "connect_signal",
+    "badge": "Signal Spark",
+    "badgeIcon": "\u26a1"
+  },
+  {
+    "id": 29,
+    "title": "Make Camera2D Follow Player",
+    "category": "Camera",
+    "difficulty": "Intermediate",
+    "summary": "Attach or target a camera for smooth play.",
+    "steps": [
+      "Read the goal: Attach or target a camera for smooth play.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Camera2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Camera2D\n\n@export var target: Node2D\n\nfunc _process(delta):\n    if target:\n        position = position.lerp(target.position, 6 * delta)\n",
+    "checks": [
+      "Camera2D",
+      "position",
+      "lerp"
+    ],
+    "hint": "Your code should include: Camera2D, position, lerp. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "camera",
+    "badge": "2D Pilot",
+    "badgeIcon": "\ud83d\udef8"
+  },
+  {
+    "id": 30,
+    "title": "Play an AnimationPlayer Clip",
+    "category": "Animation",
+    "difficulty": "Intermediate",
+    "summary": "Trigger animations from GDScript.",
+    "steps": [
+      "Read the goal: Trigger animations from GDScript.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nfunc _ready():\n    $AnimationPlayer.play(\"idle\")\n",
+    "checks": [
+      "$AnimationPlayer.play",
+      "idle"
+    ],
+    "hint": "Your code should include: $AnimationPlayer.play, idle. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "animation",
+    "badge": "Animation Crafter",
+    "badgeIcon": "\ud83c\udf9e\ufe0f"
+  },
+  {
+    "id": 31,
+    "title": "Switch Animation by Velocity",
+    "category": "Animation",
+    "difficulty": "Intermediate",
+    "summary": "Choose idle or run animation based on movement.",
+    "steps": [
+      "Read the goal: Choose idle or run animation based on movement.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nfunc _physics_process(delta):\n    if velocity.length() > 0:\n        $AnimationPlayer.play(\"run\")\n    else:\n        $AnimationPlayer.play(\"idle\")\n",
+    "checks": [
+      "velocity.length",
+      "play",
+      "run"
+    ],
+    "hint": "Your code should include: velocity.length, play, run. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "anim_velocity",
+    "badge": "Animation Crafter",
+    "badgeIcon": "\ud83c\udf9e\ufe0f"
+  },
+  {
+    "id": 32,
+    "title": "Play a Sound Effect",
+    "category": "Audio",
+    "difficulty": "Intermediate",
+    "summary": "Trigger AudioStreamPlayer when an event happens.",
+    "steps": [
+      "Read the goal: Trigger AudioStreamPlayer when an event happens.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nfunc collect():\n    $AudioStreamPlayer.play()\n",
+    "checks": [
+      "$AudioStreamPlayer.play"
+    ],
+    "hint": "Your code should include: $AudioStreamPlayer.play. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "audio",
+    "badge": "Audio Alchemist",
+    "badgeIcon": "\ud83c\udfa7"
+  },
+  {
+    "id": 33,
+    "title": "Change Music Volume",
+    "category": "Audio",
+    "difficulty": "Intermediate",
+    "summary": "Adjust volume_db for better sound design.",
+    "steps": [
+      "Read the goal: Adjust volume_db for better sound design.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nfunc _ready():\n    $Music.volume_db = -8\n    $Music.play()\n",
+    "checks": [
+      "volume_db",
+      "$Music"
+    ],
+    "hint": "Your code should include: volume_db, $Music. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "audio_volume",
+    "badge": "Audio Alchemist",
+    "badgeIcon": "\ud83c\udfa7"
+  },
+  {
+    "id": 34,
+    "title": "Build a Health Bar",
+    "category": "UI",
+    "difficulty": "Intermediate",
+    "summary": "Use ProgressBar to display player health.",
+    "steps": [
+      "Read the goal: Use ProgressBar to display player health.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Update Control nodes such as Labels, Buttons, Panels, ProgressBars, or menu screens.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CanvasLayer\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CanvasLayer\n\nvar health = 75\n\nfunc _ready():\n    $HealthBar.max_value = 100\n    $HealthBar.value = health\n",
+    "checks": [
+      "$HealthBar.value",
+      "health",
+      "max_value"
+    ],
+    "hint": "Your code should include: $HealthBar.value, health, max_value. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "health_bar",
+    "badge": "UI Builder",
+    "badgeIcon": "\ud83e\udde9"
+  },
+  {
+    "id": 35,
+    "title": "Show a Pause Menu",
+    "category": "UI",
+    "difficulty": "Intermediate",
+    "summary": "Toggle paused state and a pause panel.",
+    "steps": [
+      "Read the goal: Toggle paused state and a pause panel.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Update Control nodes such as Labels, Buttons, Panels, ProgressBars, or menu screens.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Control\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Control\n\nfunc _process(delta):\n    if Input.is_action_just_pressed(\"ui_cancel\"):\n        get_tree().paused = !get_tree().paused\n        visible = get_tree().paused\n",
+    "checks": [
+      "get_tree().paused",
+      "visible",
+      "Input.is_action_just_pressed"
+    ],
+    "hint": "Your code should include: get_tree().paused, visible, Input.is_action_just_pressed. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "pause",
+    "badge": "UI Builder",
+    "badgeIcon": "\ud83e\udde9"
+  },
+  {
+    "id": 36,
+    "title": "Change to Game Scene",
+    "category": "Menus",
+    "difficulty": "Intermediate",
+    "summary": "Switch scenes from a menu button.",
+    "steps": [
+      "Read the goal: Switch scenes from a menu button.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Update Control nodes such as Labels, Buttons, Panels, ProgressBars, or menu screens.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Control\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Control\n\nfunc _on_start_pressed():\n    get_tree().change_scene_to_file(\"res://levels/Level1.tscn\")\n",
+    "checks": [
+      "change_scene_to_file",
+      "res://"
+    ],
+    "hint": "Your code should include: change_scene_to_file, res://. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "change_scene",
+    "badge": "Scene Builder",
+    "badgeIcon": "\ud83c\udfac"
+  },
+  {
+    "id": 37,
+    "title": "Create a Player Data Resource",
+    "category": "Resources",
+    "difficulty": "Intermediate",
+    "summary": "Store reusable data in a Resource class.",
+    "steps": [
+      "Read the goal: Store reusable data in a Resource class.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Resource\nclass_name PlayerStats\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Resource\nclass_name PlayerStats\n\n@export var health = 100\n@export var speed = 220\n",
+    "checks": [
+      "extends Resource",
+      "@export var",
+      "class_name"
+    ],
+    "hint": "Your code should include: extends Resource, @export var, class_name. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "resource",
+    "badge": "Resource Keeper",
+    "badgeIcon": "\ud83d\udcbe"
+  },
+  {
+    "id": 38,
+    "title": "Use Export Variables",
+    "category": "Exports",
+    "difficulty": "Intermediate",
+    "summary": "Expose values to the Inspector.",
+    "steps": [
+      "Read the goal: Expose values to the Inspector.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\n@export var speed = 220\n@export var health = 100\n",
+    "checks": [
+      "@export var speed",
+      "@export var health"
+    ],
+    "hint": "Your code should include: @export var speed, @export var health. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "export_vars",
+    "badge": "Resource Keeper",
+    "badgeIcon": "\ud83d\udcbe"
+  },
+  {
+    "id": 39,
+    "title": "Call All Enemies in a Group",
+    "category": "Groups",
+    "difficulty": "Intermediate",
+    "summary": "Use groups to organize gameplay objects.",
+    "steps": [
+      "Read the goal: Use groups to organize gameplay objects.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nfunc freeze_enemies():\n    get_tree().call_group(\"enemies\", \"freeze\")\n",
+    "checks": [
+      "get_tree().call_group",
+      "enemies"
+    ],
+    "hint": "Your code should include: get_tree().call_group, enemies. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "groups",
+    "badge": "AI Pathfinder",
+    "badgeIcon": "\ud83e\udde0"
+  },
+  {
+    "id": 40,
+    "title": "Read a TileMap Position",
+    "category": "TileMap",
+    "difficulty": "Intermediate",
+    "summary": "Convert world positions to tile coordinates.",
+    "steps": [
+      "Read the goal: Convert world positions to tile coordinates.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nfunc _ready():\n    var tile = $TileMap.local_to_map($TileMap.to_local(global_position))\n    print(tile)\n",
+    "checks": [
+      "local_to_map",
+      "$TileMap"
+    ],
+    "hint": "Your code should include: local_to_map, $TileMap. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "tilemap",
+    "badge": "World Builder",
+    "badgeIcon": "\ud83d\uddfa\ufe0f"
+  },
+  {
+    "id": 41,
+    "title": "Place a Tile from Code",
+    "category": "TileMap",
+    "difficulty": "Intermediate",
+    "summary": "Paint a tile with set_cell().",
+    "steps": [
+      "Read the goal: Paint a tile with set_cell().",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nfunc place_ground():\n    $TileMap.set_cell(0, Vector2i(4, 6), 1, Vector2i(0, 0))\n",
+    "checks": [
+      "set_cell",
+      "Vector2i"
+    ],
+    "hint": "Your code should include: set_cell, Vector2i. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "tile_place",
+    "badge": "World Builder",
+    "badgeIcon": "\ud83d\uddfa\ufe0f"
+  },
+  {
+    "id": 42,
+    "title": "Save Score to a File",
+    "category": "Save Data",
+    "difficulty": "Intermediate",
+    "summary": "Write a simple save file.",
+    "steps": [
+      "Read the goal: Write a simple save file.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nfunc save_score(score):\n    var file = FileAccess.open(\"user://save.txt\", FileAccess.WRITE)\n    file.store_string(str(score))\n",
+    "checks": [
+      "FileAccess.open",
+      "store_string",
+      "WRITE"
+    ],
+    "hint": "Your code should include: FileAccess.open, store_string, WRITE. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "save_file",
+    "badge": "Inventory Keeper",
+    "badgeIcon": "\ud83c\udf92"
+  },
+  {
+    "id": 43,
+    "title": "Load Score from a File",
+    "category": "Save Data",
+    "difficulty": "Intermediate",
+    "summary": "Read saved data back into the game.",
+    "steps": [
+      "Read the goal: Read saved data back into the game.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nfunc load_score():\n    var file = FileAccess.open(\"user://save.txt\", FileAccess.READ)\n    return file.get_as_text()\n",
+    "checks": [
+      "FileAccess.open",
+      "get_as_text",
+      "READ"
+    ],
+    "hint": "Your code should include: FileAccess.open, get_as_text, READ. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "load_file",
+    "badge": "Inventory Keeper",
+    "badgeIcon": "\ud83c\udf92"
+  },
+  {
+    "id": 44,
+    "title": "Create an Inventory Dictionary",
+    "category": "Dictionaries",
+    "difficulty": "Intermediate",
+    "summary": "Track item counts using a Dictionary.",
+    "steps": [
+      "Read the goal: Track item counts using a Dictionary.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nvar inventory = {\"coin\": 3}\n\nfunc add_item(item):\n    if inventory.has(item):\n        inventory[item] += 1\n    else:\n        inventory[item] = 1\n",
+    "checks": [
+      "var inventory",
+      "inventory[",
+      "has"
+    ],
+    "hint": "Your code should include: var inventory, inventory[, has. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "inventory",
+    "badge": "Inventory Keeper",
+    "badgeIcon": "\ud83c\udf92"
+  },
+  {
+    "id": 45,
+    "title": "Manage a Quest List",
+    "category": "Arrays",
+    "difficulty": "Intermediate",
+    "summary": "Use arrays to track active quests.",
+    "steps": [
+      "Read the goal: Use arrays to track active quests.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nvar quests = []\n\nfunc add_quest(name):\n    quests.append(name)\n    for quest in quests:\n        print(quest)\n",
+    "checks": [
+      "var quests",
+      "append",
+      "for quest"
+    ],
+    "hint": "Your code should include: var quests, append, for quest. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "quests",
+    "badge": "Quest Designer",
+    "badgeIcon": "\ud83d\udcd6"
+  },
+  {
+    "id": 46,
+    "title": "Fire a Projectile",
+    "category": "Combat",
+    "difficulty": "Intermediate",
+    "summary": "Instance and launch a projectile scene.",
+    "steps": [
+      "Read the goal: Instance and launch a projectile scene.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nvar ProjectileScene = preload(\"res://Projectile.tscn\")\n\nfunc fire(direction):\n    var projectile = ProjectileScene.instantiate()\n    projectile.direction = direction\n    add_child(projectile)\n",
+    "checks": [
+      "preload",
+      "instantiate",
+      "direction"
+    ],
+    "hint": "Your code should include: preload, instantiate, direction. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "projectile",
+    "badge": "Combat Coder",
+    "badgeIcon": "\u2694\ufe0f"
+  },
+  {
+    "id": 47,
+    "title": "Destroy Enemy on Hit",
+    "category": "Combat",
+    "difficulty": "Intermediate",
+    "summary": "Combine damage and queue_free().",
+    "steps": [
+      "Read the goal: Combine damage and queue_free().",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nvar health = 30\n\nfunc take_damage(amount):\n    health -= amount\n    if health <= 0:\n        queue_free()\n",
+    "checks": [
+      "take_damage",
+      "queue_free",
+      "health <= 0"
+    ],
+    "hint": "Your code should include: take_damage, queue_free, health <= 0. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "enemy_hit",
+    "badge": "Combat Coder",
+    "badgeIcon": "\u2694\ufe0f"
+  },
+  {
+    "id": 48,
+    "title": "Move Enemy Toward Player",
+    "category": "AI",
+    "difficulty": "Intermediate",
+    "summary": "Use direction_to() for simple enemy movement.",
+    "steps": [
+      "Read the goal: Use direction_to() for simple enemy movement.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\n@export var player: Node2D\nvar speed = 90\n\nfunc _physics_process(delta):\n    var direction = global_position.direction_to(player.global_position)\n    velocity = direction * speed\n    move_and_slide()\n",
+    "checks": [
+      "direction_to",
+      "global_position",
+      "move_and_slide"
+    ],
+    "hint": "Your code should include: direction_to, global_position, move_and_slide. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "enemy_ai",
+    "badge": "AI Pathfinder",
+    "badgeIcon": "\ud83e\udde0"
+  },
+  {
+    "id": 49,
+    "title": "Patrol Between Points",
+    "category": "AI",
+    "difficulty": "Intermediate",
+    "summary": "Build simple patrol behavior.",
+    "steps": [
+      "Read the goal: Build simple patrol behavior.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nvar patrol_points = [Vector2(0, 0), Vector2(200, 0)]\nvar current_point = 0\n\nfunc _physics_process(delta):\n    position = position.move_toward(patrol_points[current_point], 80 * delta)\n",
+    "checks": [
+      "patrol_points",
+      "current_point",
+      "move_toward"
+    ],
+    "hint": "Your code should include: patrol_points, current_point, move_toward. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "patrol",
+    "badge": "AI Pathfinder",
+    "badgeIcon": "\ud83e\udde0"
+  },
+  {
+    "id": 50,
+    "title": "Create a Player State Variable",
+    "category": "State Machines",
+    "difficulty": "Advanced",
+    "summary": "Use states to organize player behavior.",
+    "steps": [
+      "Read the goal: Use states to organize player behavior.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nenum State { IDLE, RUN, ATTACK }\nvar current_state = State.IDLE\n\nfunc _physics_process(delta):\n    match current_state:\n        State.IDLE:\n            velocity = Vector2.ZERO\n        State.RUN:\n            move_and_slide()\n",
+    "checks": [
+      "enum State",
+      "current_state",
+      "match current_state"
+    ],
+    "hint": "Your code should include: enum State, current_state, match current_state. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "state_machine",
+    "badge": "System Architect",
+    "badgeIcon": "\ud83c\udfd7\ufe0f"
+  },
+  {
+    "id": 51,
+    "title": "Switch Between Idle and Run",
+    "category": "State Machines",
+    "difficulty": "Advanced",
+    "summary": "Use match to control animation and movement.",
+    "steps": [
+      "Read the goal: Use match to control animation and movement.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nenum State { IDLE, RUN }\nvar current_state = State.IDLE\n\nfunc update_state():\n    match current_state:\n        State.IDLE:\n            $AnimationPlayer.play(\"idle\")\n        State.RUN:\n            $AnimationPlayer.play(\"run\")\n",
+    "checks": [
+      "match current_state",
+      "State.IDLE",
+      "State.RUN"
+    ],
+    "hint": "Your code should include: match current_state, State.IDLE, State.RUN. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "state_run",
+    "badge": "System Architect",
+    "badgeIcon": "\ud83c\udfd7\ufe0f"
+  },
+  {
+    "id": 52,
+    "title": "Add Attack State",
+    "category": "State Machines",
+    "difficulty": "Advanced",
+    "summary": "Prevent movement while attacking.",
+    "steps": [
+      "Read the goal: Prevent movement while attacking.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nenum State { IDLE, RUN, ATTACK }\nvar current_state = State.ATTACK\nvar attack_timer = 0.25\n\nfunc _physics_process(delta):\n    if current_state == State.ATTACK:\n        velocity = Vector2.ZERO\n        attack_timer -= delta\n",
+    "checks": [
+      "State.ATTACK",
+      "attack_timer",
+      "velocity = Vector2.ZERO"
+    ],
+    "hint": "Your code should include: State.ATTACK, attack_timer, velocity = Vector2.ZERO. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "state_attack",
+    "badge": "Combat Coder",
+    "badgeIcon": "\u2694\ufe0f"
+  },
+  {
+    "id": 53,
+    "title": "Create a GameManager Singleton",
+    "category": "Autoload",
+    "difficulty": "Advanced",
+    "summary": "Store global game data in an autoload-style script.",
+    "steps": [
+      "Read the goal: Store global game data in an autoload-style script.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\nclass_name GameManager\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\nclass_name GameManager\n\nvar score = 0\n\nfunc reset_game():\n    score = 0\n",
+    "checks": [
+      "class_name GameManager",
+      "var score",
+      "func reset_game"
+    ],
+    "hint": "Your code should include: class_name GameManager, var score, func reset_game. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "autoload",
+    "badge": "System Architect",
+    "badgeIcon": "\ud83c\udfd7\ufe0f"
+  },
+  {
+    "id": 54,
+    "title": "Broadcast Score Changed",
+    "category": "Autoload",
+    "difficulty": "Advanced",
+    "summary": "Use a singleton-style signal for shared UI updates.",
+    "steps": [
+      "Read the goal: Use a singleton-style signal for shared UI updates.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nsignal score_changed(score)\nvar score = 0\n\nfunc add_score(points):\n    score += points\n    emit_signal(\"score_changed\", score)\n",
+    "checks": [
+      "signal score_changed",
+      "emit_signal",
+      "score"
+    ],
+    "hint": "Your code should include: signal score_changed, emit_signal, score. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "autoload_signal",
+    "badge": "System Architect",
+    "badgeIcon": "\ud83c\udfd7\ufe0f"
+  },
+  {
+    "id": 55,
+    "title": "Show Dialogue One Line at a Time",
+    "category": "Dialogue",
+    "difficulty": "Advanced",
+    "summary": "Build a basic dialogue controller.",
+    "steps": [
+      "Read the goal: Build a basic dialogue controller.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Control\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Control\n\nvar dialogue_lines = [\"Hello hero.\", \"Find the key.\"]\nvar line_index = 0\n\nfunc show_next_line():\n    $Label.text = dialogue_lines[line_index]\n    line_index += 1\n",
+    "checks": [
+      "dialogue_lines",
+      "line_index",
+      "show_next_line"
+    ],
+    "hint": "Your code should include: dialogue_lines, line_index, show_next_line. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "dialogue",
+    "badge": "Quest Designer",
+    "badgeIcon": "\ud83d\udcd6"
+  },
+  {
+    "id": 56,
+    "title": "Add Dialogue Choices",
+    "category": "Dialogue",
+    "difficulty": "Advanced",
+    "summary": "Let the player choose a response.",
+    "steps": [
+      "Read the goal: Let the player choose a response.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Control\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Control\n\nvar choices = [\"Accept\", \"Decline\"]\nvar selected_choice = 0\n\nfunc choose():\n    match choices[selected_choice]:\n        \"Accept\": print(\"Quest accepted\")\n        \"Decline\": print(\"Maybe later\")\n",
+    "checks": [
+      "choices",
+      "selected_choice",
+      "match"
+    ],
+    "hint": "Your code should include: choices, selected_choice, match. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "dialogue_choice",
+    "badge": "Quest Designer",
+    "badgeIcon": "\ud83d\udcd6"
+  },
+  {
+    "id": 57,
+    "title": "Complete a Quest Objective",
+    "category": "Quests",
+    "difficulty": "Advanced",
+    "summary": "Update a quest when a condition is met.",
+    "steps": [
+      "Read the goal: Update a quest when a condition is met.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nvar quest = {\"objective\": \"Collect 3 coins\", \"completed\": false}\n\nfunc complete_objective(objective):\n    if objective == quest.objective:\n        quest.completed = true\n",
+    "checks": [
+      "quest.completed = true",
+      "objective"
+    ],
+    "hint": "Your code should include: quest.completed = true, objective. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "quest_complete",
+    "badge": "Quest Designer",
+    "badgeIcon": "\ud83d\udcd6"
+  },
+  {
+    "id": 58,
+    "title": "Add Items with Stack Limits",
+    "category": "Inventory",
+    "difficulty": "Advanced",
+    "summary": "Prevent stacks from exceeding a limit.",
+    "steps": [
+      "Read the goal: Prevent stacks from exceeding a limit.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nconst MAX_STACK = 10\nvar inventory = {\"potion\": 8}\n\nfunc add_potion(amount):\n    inventory[\"potion\"] = min(inventory[\"potion\"] + amount, MAX_STACK)\n",
+    "checks": [
+      "MAX_STACK",
+      "min",
+      "inventory"
+    ],
+    "hint": "Your code should include: MAX_STACK, min, inventory. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "stack_limits",
+    "badge": "Inventory Keeper",
+    "badgeIcon": "\ud83c\udf92"
+  },
+  {
+    "id": 59,
+    "title": "Equip a Weapon",
+    "category": "Inventory",
+    "difficulty": "Advanced",
+    "summary": "Move an item from inventory to equipment.",
+    "steps": [
+      "Read the goal: Move an item from inventory to equipment.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nvar inventory = {\"iron_sword\": 1}\nvar equipped_weapon = null\n\nfunc equip(weapon):\n    if inventory.has(weapon):\n        equipped_weapon = weapon\n        inventory.erase(weapon)\n",
+    "checks": [
+      "equipped_weapon",
+      "inventory.erase",
+      "weapon"
+    ],
+    "hint": "Your code should include: equipped_weapon, inventory.erase, weapon. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "equip_weapon",
+    "badge": "Inventory Keeper",
+    "badgeIcon": "\ud83c\udf92"
+  },
+  {
+    "id": 60,
+    "title": "Create a Dynamic Inventory UI",
+    "category": "UI",
+    "difficulty": "Advanced",
+    "summary": "Generate slots from inventory data.",
+    "steps": [
+      "Read the goal: Generate slots from inventory data.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Update Control nodes such as Labels, Buttons, Panels, ProgressBars, or menu screens.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Control\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Control\n\nvar inventory = {\"coin\": 5, \"potion\": 2}\nvar SlotScene = preload(\"res://ItemSlot.tscn\")\n\nfunc rebuild_ui():\n    for item in inventory:\n        var slot = SlotScene.instantiate()\n        add_child(slot)\n",
+    "checks": [
+      "for item in inventory",
+      "instantiate",
+      "add_child"
+    ],
+    "hint": "Your code should include: for item in inventory, instantiate, add_child. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "dynamic_ui",
+    "badge": "UI Builder",
+    "badgeIcon": "\ud83e\udde9"
+  },
+  {
+    "id": 61,
+    "title": "Drag and Drop Inventory Slots",
+    "category": "UI",
+    "difficulty": "Advanced",
+    "summary": "Start drag data from an item slot.",
+    "steps": [
+      "Read the goal: Start drag data from an item slot.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Update Control nodes such as Labels, Buttons, Panels, ProgressBars, or menu screens.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Control\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Control\n\nfunc _get_drag_data(position):\n    return {\"item\": \"potion\"}\n\nfunc _can_drop_data(position, data):\n    return data.has(\"item\")\n\nfunc _drop_data(position, data):\n    print(data.item)\n",
+    "checks": [
+      "_get_drag_data",
+      "_can_drop_data",
+      "_drop_data"
+    ],
+    "hint": "Your code should include: _get_drag_data, _can_drop_data, _drop_data. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "drag_drop",
+    "badge": "UI Builder",
+    "badgeIcon": "\ud83e\udde9"
+  },
+  {
+    "id": 62,
+    "title": "Use NavigationAgent2D",
+    "category": "Navigation",
+    "difficulty": "Advanced",
+    "summary": "Move an enemy using pathfinding.",
+    "steps": [
+      "Read the goal: Move an enemy using pathfinding.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\n@onready var agent = $NavigationAgent2D\n\nfunc _physics_process(delta):\n    var next_position = agent.get_next_path_position()\n    velocity = global_position.direction_to(next_position) * 120\n    move_and_slide()\n",
+    "checks": [
+      "NavigationAgent2D",
+      "target_position",
+      "get_next_path_position"
+    ],
+    "hint": "Your code should include: NavigationAgent2D, target_position, get_next_path_position. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "nav_agent",
+    "badge": "AI Pathfinder",
+    "badgeIcon": "\ud83e\udde0"
+  },
+  {
+    "id": 63,
+    "title": "Recalculate Path to Player",
+    "category": "Navigation",
+    "difficulty": "Advanced",
+    "summary": "Update navigation target over time.",
+    "steps": [
+      "Read the goal: Update navigation target over time.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\n@onready var agent = $NavigationAgent2D\n@export var player: Node2D\n\nfunc _process(delta):\n    agent.target_position = player.global_position\n",
+    "checks": [
+      "target_position",
+      "player.global_position",
+      "NavigationAgent2D"
+    ],
+    "hint": "Your code should include: target_position, player.global_position, NavigationAgent2D. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "nav_recalc",
+    "badge": "AI Pathfinder",
+    "badgeIcon": "\ud83e\udde0"
+  },
+  {
+    "id": 64,
+    "title": "Create a Flash Shader Trigger",
+    "category": "Shaders",
+    "difficulty": "Advanced",
+    "summary": "Toggle a shader parameter when damaged.",
+    "steps": [
+      "Read the goal: Toggle a shader parameter when damaged.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Sprite2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Sprite2D\n\nfunc flash_damage():\n    material.set_shader_parameter(\"flash\", 1.0)\n",
+    "checks": [
+      "material.set_shader_parameter",
+      "flash"
+    ],
+    "hint": "Your code should include: material.set_shader_parameter, flash. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "shader",
+    "badge": "Visual FX",
+    "badgeIcon": "\u2728"
+  },
+  {
+    "id": 65,
+    "title": "Play Hit Particles",
+    "category": "Particles",
+    "difficulty": "Advanced",
+    "summary": "Spawn particles on impact.",
+    "steps": [
+      "Read the goal: Spawn particles on impact.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nfunc play_hit_fx():\n    $HitParticles.emitting = true\n",
+    "checks": [
+      "$HitParticles.emitting = true"
+    ],
+    "hint": "Your code should include: $HitParticles.emitting = true. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "particles",
+    "badge": "Visual FX",
+    "badgeIcon": "\u2728"
+  },
+  {
+    "id": 66,
+    "title": "Animate a Light2D Flicker",
+    "category": "Lighting",
+    "difficulty": "Advanced",
+    "summary": "Make a torch feel alive.",
+    "steps": [
+      "Read the goal: Make a torch feel alive.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nfunc _process(delta):\n    $PointLight2D.energy = randf_range(0.85, 1.25)\n",
+    "checks": [
+      "$PointLight2D",
+      "energy",
+      "randf_range"
+    ],
+    "hint": "Your code should include: $PointLight2D, energy, randf_range. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "light",
+    "badge": "Visual FX",
+    "badgeIcon": "\u2728"
+  },
+  {
+    "id": 67,
+    "title": "Move a Node3D",
+    "category": "3D Basics",
+    "difficulty": "Advanced",
+    "summary": "Control 3D position with Vector3.",
+    "steps": [
+      "Read the goal: Control 3D position with Vector3.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use 3D node types such as Node3D, CharacterBody3D, Camera3D, Vector3, or RayCast3D.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node3D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node3D\n\nfunc _process(delta):\n    position.x += 2.0 * delta\n    var forward = Vector3.FORWARD\n",
+    "checks": [
+      "extends Node3D",
+      "position.x",
+      "Vector3"
+    ],
+    "hint": "Your code should include: extends Node3D, position.x, Vector3. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "node3d",
+    "badge": "3D Starter",
+    "badgeIcon": "\ud83e\uddca"
+  },
+  {
+    "id": 68,
+    "title": "Rotate a MeshInstance3D",
+    "category": "3D Basics",
+    "difficulty": "Advanced",
+    "summary": "Spin a 3D object over time.",
+    "steps": [
+      "Read the goal: Spin a 3D object over time.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use 3D node types such as Node3D, CharacterBody3D, Camera3D, Vector3, or RayCast3D.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends MeshInstance3D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends MeshInstance3D\n\nfunc _process(delta):\n    rotation_degrees.y += 90 * delta\n",
+    "checks": [
+      "rotation_degrees",
+      "delta"
+    ],
+    "hint": "Your code should include: rotation_degrees, delta. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "mesh_rotate",
+    "badge": "3D Starter",
+    "badgeIcon": "\ud83e\uddca"
+  },
+  {
+    "id": 69,
+    "title": "Create CharacterBody3D Movement",
+    "category": "3D Physics",
+    "difficulty": "Advanced",
+    "summary": "Build a starter 3D controller.",
+    "steps": [
+      "Read the goal: Build a starter 3D controller.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use 3D node types such as Node3D, CharacterBody3D, Camera3D, Vector3, or RayCast3D.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody3D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody3D\n\nvar speed = 5.0\n\nfunc _physics_process(delta):\n    var direction = Vector3.ZERO\n    velocity.x = direction.x * speed\n    move_and_slide()\n",
+    "checks": [
+      "extends CharacterBody3D",
+      "Vector3.ZERO",
+      "move_and_slide"
+    ],
+    "hint": "Your code should include: extends CharacterBody3D, Vector3.ZERO, move_and_slide. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "body3d",
+    "badge": "3D Starter",
+    "badgeIcon": "\ud83e\uddca"
+  },
+  {
+    "id": 70,
+    "title": "Make a Third Person Camera Target",
+    "category": "3D Camera",
+    "difficulty": "Advanced",
+    "summary": "Follow a 3D player smoothly.",
+    "steps": [
+      "Read the goal: Follow a 3D player smoothly.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use 3D node types such as Node3D, CharacterBody3D, Camera3D, Vector3, or RayCast3D.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Camera3D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Camera3D\n\n@export var target: Node3D\n\nfunc _process(delta):\n    if target:\n        global_position = global_position.lerp(target.global_position + Vector3(0, 4, 8), 5 * delta)\n",
+    "checks": [
+      "Camera3D",
+      "lerp",
+      "global_position"
+    ],
+    "hint": "Your code should include: Camera3D, lerp, global_position. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "camera3d",
+    "badge": "3D Starter",
+    "badgeIcon": "\ud83e\uddca"
+  },
+  {
+    "id": 71,
+    "title": "Use RayCast3D for Interaction",
+    "category": "Raycasts",
+    "difficulty": "Advanced",
+    "summary": "Detect interactable objects in front of the player.",
+    "steps": [
+      "Read the goal: Detect interactable objects in front of the player.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Use 3D node types such as Node3D, CharacterBody3D, Camera3D, Vector3, or RayCast3D.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node3D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node3D\n\nfunc interact():\n    if $RayCast3D.is_colliding():\n        var hit = $RayCast3D.get_collider()\n        print(hit.name)\n",
+    "checks": [
+      "RayCast3D",
+      "is_colliding",
+      "get_collider"
+    ],
+    "hint": "Your code should include: RayCast3D, is_colliding, get_collider. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "raycast",
+    "badge": "3D Starter",
+    "badgeIcon": "\ud83e\uddca"
+  },
+  {
+    "id": 72,
+    "title": "Prepare a Multiplayer Peer",
+    "category": "Multiplayer",
+    "difficulty": "Advanced",
+    "summary": "Sketch a high-level multiplayer setup.",
+    "steps": [
+      "Read the goal: Sketch a high-level multiplayer setup.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nfunc host_game():\n    var peer = ENetMultiplayerPeer.new()\n    peer.create_server(7777)\n    multiplayer.multiplayer_peer = peer\n",
+    "checks": [
+      "ENetMultiplayerPeer",
+      "create_server",
+      "multiplayer_peer"
+    ],
+    "hint": "Your code should include: ENetMultiplayerPeer, create_server, multiplayer_peer. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "multiplayer",
+    "badge": "Network Novice",
+    "badgeIcon": "\ud83c\udf10"
+  },
+  {
+    "id": 73,
+    "title": "Mark an RPC Function",
+    "category": "Multiplayer",
+    "difficulty": "Advanced",
+    "summary": "Create a remote callable method.",
+    "steps": [
+      "Read the goal: Create a remote callable method.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\n@rpc(\"any_peer\")\nfunc receive_message(text):\n    print(text)\n\nfunc send_message():\n    rpc(\"receive_message\", \"Hello\")\n",
+    "checks": [
+      "@rpc",
+      "func",
+      "rpc"
+    ],
+    "hint": "Your code should include: @rpc, func, rpc. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "rpc",
+    "badge": "Network Novice",
+    "badgeIcon": "\ud83c\udf10"
+  },
+  {
+    "id": 74,
+    "title": "Make an Editor Tool Script",
+    "category": "Tools",
+    "difficulty": "Advanced",
+    "summary": "Run code inside the Godot editor.",
+    "steps": [
+      "Read the goal: Run code inside the Godot editor.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "@tool\nextends Node2D\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "@tool\nextends Node2D\n\nfunc _process(delta):\n    rotation += delta\n",
+    "checks": [
+      "@tool",
+      "func _process"
+    ],
+    "hint": "Your code should include: @tool, func _process. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "tool_script",
+    "badge": "System Architect",
+    "badgeIcon": "\ud83c\udfd7\ufe0f"
+  },
+  {
+    "id": 75,
+    "title": "Create a Simple Assertion",
+    "category": "Testing",
+    "difficulty": "Advanced",
+    "summary": "Practice testing gameplay rules.",
+    "steps": [
+      "Read the goal: Practice testing gameplay rules.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nfunc test_score():\n    var expected = 10\n    var actual = 5 + 5\n    assert(actual == expected)\n",
+    "checks": [
+      "assert",
+      "expected",
+      "actual"
+    ],
+    "hint": "Your code should include: assert, expected, actual. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "assert",
+    "badge": "System Architect",
+    "badgeIcon": "\ud83c\udfd7\ufe0f"
+  },
+  {
+    "id": 76,
+    "title": "Print Rich Debug Info",
+    "category": "Debugging",
+    "difficulty": "Advanced",
+    "summary": "Use clear debug messages to catch bugs.",
+    "steps": [
+      "Read the goal: Use clear debug messages to catch bugs.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nfunc check_player(player):\n    if player == null:\n        push_warning(\"Player missing\")\n    print_debug(\"Checked player reference\")\n",
+    "checks": [
+      "push_warning",
+      "print_debug"
+    ],
+    "hint": "Your code should include: push_warning, print_debug. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "debug",
+    "badge": "System Architect",
+    "badgeIcon": "\ud83c\udfd7\ufe0f"
+  },
+  {
+    "id": 77,
+    "title": "Pool Projectiles",
+    "category": "Optimization",
+    "difficulty": "Advanced",
+    "summary": "Reuse objects instead of constantly creating them.",
+    "steps": [
+      "Read the goal: Reuse objects instead of constantly creating them.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nvar projectile_pool = []\n\nfunc get_projectile():\n    for projectile in projectile_pool:\n        if projectile.available:\n            projectile.visible = false\n            return projectile\n",
+    "checks": [
+      "projectile_pool",
+      "visible = false",
+      "available"
+    ],
+    "hint": "Your code should include: projectile_pool, visible = false, available. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "pooling",
+    "badge": "System Architect",
+    "badgeIcon": "\ud83c\udfd7\ufe0f"
+  },
+  {
+    "id": 78,
+    "title": "Limit Enemy Updates by Distance",
+    "category": "Optimization",
+    "difficulty": "Advanced",
+    "summary": "Skip expensive logic when far away.",
+    "steps": [
+      "Read the goal: Skip expensive logic when far away.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\n@export var player: Node2D\nvar update_range = 600\n\nfunc _physics_process(delta):\n    if global_position.distance_to(player.global_position) > update_range:\n        return\n    move_and_slide()\n",
+    "checks": [
+      "distance_to",
+      "return",
+      "update_range"
+    ],
+    "hint": "Your code should include: distance_to, return, update_range. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "distance_skip",
+    "badge": "System Architect",
+    "badgeIcon": "\ud83c\udfd7\ufe0f"
+  },
+  {
+    "id": 79,
+    "title": "Build a Complete Player Controller",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Combine input, physics, jump, and animation.",
+    "steps": [
+      "Read the goal: Combine input, physics, jump, and animation.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nvar speed = 260\nvar gravity = 980\nvar jump_force = -420\n\nfunc _physics_process(delta):\n    var input = Input.get_vector(\"ui_left\", \"ui_right\", \"ui_up\", \"ui_down\")\n    velocity.x = input.x * speed\n    velocity.y += gravity * delta\n    if Input.is_action_just_pressed(\"ui_accept\") and is_on_floor():\n        velocity.y = jump_force\n    move_and_slide()\n",
+    "checks": [
+      "extends CharacterBody2D",
+      "Input.get_vector",
+      "move_and_slide",
+      "is_on_floor"
+    ],
+    "hint": "Your code should include: extends CharacterBody2D, Input.get_vector, move_and_slide, is_on_floor. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_player",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 80,
+    "title": "Build a Coin Collection Loop",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Spawn coins, collect them, and update score UI.",
+    "steps": [
+      "Read the goal: Spawn coins, collect them, and update score UI.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nvar CoinScene = preload(\"res://Coin.tscn\")\nvar score = 0\n\nfunc spawn_coin():\n    var coin = CoinScene.instantiate()\n    add_child(coin)\n\nfunc collect_coin(coin):\n    score += 1\n    coin.queue_free()\n    $ScoreLabel.text = \"Score: \" + str(score)\n",
+    "checks": [
+      "instantiate",
+      "queue_free",
+      "$ScoreLabel.text"
+    ],
+    "hint": "Your code should include: instantiate, queue_free, $ScoreLabel.text. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_coins",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 81,
+    "title": "Build an Enemy Wave Spawner",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Spawn enemies in waves with a timer.",
+    "steps": [
+      "Read the goal: Spawn enemies in waves with a timer.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nvar wave = 1\nvar EnemyScene = preload(\"res://Enemy.tscn\")\n\nfunc _on_Timer_timeout():\n    spawn_enemy()\n\nfunc spawn_enemy():\n    var enemy = EnemyScene.instantiate()\n    add_child(enemy)\n    wave += 1\n",
+    "checks": [
+      "wave",
+      "spawn_enemy",
+      "Timer"
+    ],
+    "hint": "Your code should include: wave, spawn_enemy, Timer. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_waves",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 82,
+    "title": "Build a Health and Damage System",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Create player damage, death, and UI feedback.",
+    "steps": [
+      "Read the goal: Create player damage, death, and UI feedback.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nvar health = 100\n\nfunc take_damage(amount):\n    health -= amount\n    $HealthBar.value = health\n    if health <= 0:\n        die()\n\nfunc die():\n    print(\"Player defeated\")\n",
+    "checks": [
+      "take_damage",
+      "health <= 0",
+      "$HealthBar.value"
+    ],
+    "hint": "Your code should include: take_damage, health <= 0, $HealthBar.value. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_health",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 83,
+    "title": "Build a Pause and Resume System",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Pause gameplay while keeping UI interactive.",
+    "steps": [
+      "Read the goal: Pause gameplay while keeping UI interactive.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Control\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Control\n\nfunc _ready():\n    process_mode = Node.PROCESS_MODE_ALWAYS\n\nfunc _process(delta):\n    if Input.is_action_just_pressed(\"ui_cancel\"):\n        get_tree().paused = !get_tree().paused\n        visible = get_tree().paused\n",
+    "checks": [
+      "get_tree().paused",
+      "process_mode",
+      "visible"
+    ],
+    "hint": "Your code should include: get_tree().paused, process_mode, visible. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_pause",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 84,
+    "title": "Build a Main Menu Flow",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Start, options, credits, and scene switching.",
+    "steps": [
+      "Read the goal: Start, options, credits, and scene switching.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Control\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Control\n\nfunc _on_start_pressed():\n    get_tree().change_scene_to_file(\"res://Game.tscn\")\n\nfunc options():\n    print(\"Open options\")\n\nfunc credits():\n    print(\"Created by Shocka\")\n",
+    "checks": [
+      "change_scene_to_file",
+      "options",
+      "credits"
+    ],
+    "hint": "Your code should include: change_scene_to_file, options, credits. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_menu",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 85,
+    "title": "Build a Save Slot System",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Save player name, level, and inventory.",
+    "steps": [
+      "Read the goal: Save player name, level, and inventory.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nvar save_slot = {\"name\": \"Hero\", \"level\": 3, \"inventory\": [\"key\"]}\n\nfunc save_game():\n    var file = FileAccess.open(\"user://slot1.json\", FileAccess.WRITE)\n    file.store_string(JSON.stringify(save_slot))\n",
+    "checks": [
+      "FileAccess.open",
+      "JSON.stringify",
+      "save_slot"
+    ],
+    "hint": "Your code should include: FileAccess.open, JSON.stringify, save_slot. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_save",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 86,
+    "title": "Build a Quest Tracker UI",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Show current objectives and completion state.",
+    "steps": [
+      "Read the goal: Show current objectives and completion state.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CanvasLayer\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CanvasLayer\n\nvar quest_log = [{\"name\": \"Find Key\", \"completed\": false}]\n\nfunc update_ui():\n    var text = \"\"\n    for quest in quest_log:\n        text += quest.name + \" completed: \" + str(quest.completed)\n    $QuestLabel.text = text\n",
+    "checks": [
+      "quest_log",
+      "completed",
+      "$QuestLabel.text"
+    ],
+    "hint": "Your code should include: quest_log, completed, $QuestLabel.text. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_quests",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 87,
+    "title": "Build a Dialogue NPC",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Create interaction, text progression, and choices.",
+    "steps": [
+      "Read the goal: Create interaction, text progression, and choices.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Area2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Area2D\n\nvar dialogue_lines = [\"Welcome!\", \"Choose wisely.\"]\nvar choices = [\"Help\", \"Leave\"]\n\nfunc interact():\n    print(dialogue_lines[0])\n    print(choices)\n",
+    "checks": [
+      "interact",
+      "dialogue_lines",
+      "choices"
+    ],
+    "hint": "Your code should include: interact, dialogue_lines, choices. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_dialogue",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 88,
+    "title": "Build a Top Down Adventure Prototype",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Combine movement, camera, pickups, and enemy AI.",
+    "steps": [
+      "Read the goal: Combine movement, camera, pickups, and enemy AI.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\n@export var player: Node2D\nvar score = 0\n\nfunc _physics_process(delta):\n    var input = Input.get_vector(\"ui_left\", \"ui_right\", \"ui_up\", \"ui_down\")\n    velocity = input * 240\n    $Camera2D.position = position\n    var chase = global_position.direction_to(player.global_position)\n    move_and_slide()\n",
+    "checks": [
+      "Input.get_vector",
+      "Camera2D",
+      "direction_to",
+      "score"
+    ],
+    "hint": "Your code should include: Input.get_vector, Camera2D, direction_to, score. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_topdown",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 89,
+    "title": "Build a Platformer Prototype",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Combine gravity, jumping, collectibles, and hazards.",
+    "steps": [
+      "Read the goal: Combine gravity, jumping, collectibles, and hazards.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody2D\n\nvar gravity = 980\n\nfunc _physics_process(delta):\n    velocity.y += gravity * delta\n    if is_on_floor() and Input.is_action_just_pressed(\"ui_accept\"):\n        velocity.y = -420\n    move_and_slide()\n\nfunc collect(item):\n    item.queue_free()\n\nfunc take_damage(amount):\n    print(amount)\n",
+    "checks": [
+      "velocity.y +=",
+      "is_on_floor",
+      "queue_free",
+      "take_damage"
+    ],
+    "hint": "Your code should include: velocity.y +=, is_on_floor, queue_free, take_damage. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_platformer",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 90,
+    "title": "Build a 3D Exploration Prototype",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Move a 3D player with camera and interaction raycast.",
+    "steps": [
+      "Read the goal: Move a 3D player with camera and interaction raycast.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends CharacterBody3D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends CharacterBody3D\n\n@onready var camera = $Camera3D\n@onready var ray = $Camera3D/RayCast3D\n\nfunc _physics_process(delta):\n    move_and_slide()\n    if ray.is_colliding():\n        print(ray.get_collider().name)\n",
+    "checks": [
+      "CharacterBody3D",
+      "Camera3D",
+      "RayCast3D",
+      "move_and_slide"
+    ],
+    "hint": "Your code should include: CharacterBody3D, Camera3D, RayCast3D, move_and_slide. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_3d",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 91,
+    "title": "Build a Settings Menu",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Save volume, fullscreen, and control preferences.",
+    "steps": [
+      "Read the goal: Save volume, fullscreen, and control preferences.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Control\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Control\n\nfunc save_settings():\n    $Music.volume_db = -10\n    DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)\n    var file = FileAccess.open(\"user://settings.cfg\", FileAccess.WRITE)\n    file.store_string(\"saved\")\n",
+    "checks": [
+      "volume_db",
+      "DisplayServer",
+      "FileAccess.open"
+    ],
+    "hint": "Your code should include: volume_db, DisplayServer, FileAccess.open. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_settings",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 92,
+    "title": "Build a Game Over Screen",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Restart or return to menu after losing.",
+    "steps": [
+      "Read the goal: Restart or return to menu after losing.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Control\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Control\n\nvar game_over = true\n\nfunc restart():\n    if game_over:\n        get_tree().reload_current_scene()\n\nfunc main_menu():\n    get_tree().change_scene_to_file(\"res://MainMenu.tscn\")\n",
+    "checks": [
+      "game_over",
+      "reload_current_scene",
+      "change_scene_to_file"
+    ],
+    "hint": "Your code should include: game_over, reload_current_scene, change_scene_to_file. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_gameover",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 93,
+    "title": "Build a Mini Boss Fight",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Create phases, attacks, health, and victory logic.",
+    "steps": [
+      "Read the goal: Create phases, attacks, health, and victory logic.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node2D\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node2D\n\nsignal boss_defeated\nvar phase = 1\nvar attack_timer = 2.0\nvar health = 300\n\nfunc _process(delta):\n    attack_timer -= delta\n    if health <= 0:\n        emit_signal(\"boss_defeated\")\n",
+    "checks": [
+      "phase",
+      "attack_timer",
+      "health <= 0",
+      "emit_signal"
+    ],
+    "hint": "Your code should include: phase, attack_timer, health <= 0, emit_signal. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_fight",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 94,
+    "title": "Build a Polished Export Checklist",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Prepare input, window settings, saves, and credits.",
+    "steps": [
+      "Read the goal: Prepare input, window settings, saves, and credits.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\nfunc export_checklist():\n    print(ProjectSettings.get_setting(\"application/config/name\"))\n    print(InputMap.has_action(\"ui_accept\"))\n    var credits = \"Made with Godot\"\n",
+    "checks": [
+      "ProjectSettings",
+      "InputMap",
+      "credits"
+    ],
+    "hint": "Your code should include: ProjectSettings, InputMap, credits. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "boss_export",
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51"
+  },
+  {
+    "id": 95,
+    "title": "Capstone Part 1: Tiny Godot Game Plan",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Plan a small game from scenes, scripts, UI, audio, and export.",
+    "steps": [
+      "Read the goal: Plan a small game from scenes, scripts, UI, audio, and export.",
+      "Study the starter script in the editor and identify what is missing.",
+      "Write or complete the GDScript using Godot 4 style syntax.",
+      "Press Run / Check to test your code in the training viewport.",
+      "Use the console feedback to fix errors, then earn the lesson badge."
+    ],
+    "starter": "extends Node\n\n\n# TODO: Complete the missing lesson code below.\n",
+    "solution": "extends Node\n\n# Capstone scenes: Player, Enemy, HUD, MainMenu, GameManager\nvar scenes = [\"Player\", \"Enemy\", \"HUD\", \"MainMenu\", \"GameManager\"]\n\nfunc _ready():\n    for scene in scenes:\n        print(\"Build scene:\", scene)\n",
+    "checks": [
+      "Player",
+      "Enemy",
+      "HUD",
+      "MainMenu",
+      "GameManager"
+    ],
+    "hint": "Your code should include: Player, Enemy, HUD, MainMenu, GameManager. Pay attention to indentation after func, if, for, and match lines.",
+    "demo": "capstone",
+    "badge": "Godot Champion",
+    "badgeIcon": "\ud83c\udfc6"
+  },
+  {
+    "id": 96,
+    "title": "Add Controller Support",
+    "category": "Input",
+    "difficulty": "Boss Level",
+    "summary": "Support gamepads using the same input actions as keyboard controls.",
+    "demo": "controller",
+    "checks": [
+      "Input.get_vector",
+      "ui_left",
+      "ui_right",
+      "move_and_slide"
+    ],
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51",
+    "solution": "extends CharacterBody2D\n\nvar speed = 260\n\nfunc _physics_process(delta):\n    var input = Input.get_vector(\"ui_left\", \"ui_right\", \"ui_up\", \"ui_down\")\n    velocity = input * speed\n    move_and_slide()\n",
+    "starter": "extends CharacterBody2D\n\n# TODO: Read Input.get_vector and move the player.\n",
+    "hint": "Use Input.get_vector so keyboard and gamepad mappings can share the same actions.",
+    "steps": [
+      "Open Project Settings and review Input Map actions.",
+      "Use Input.get_vector for left, right, up, and down actions.",
+      "Multiply the vector by speed and assign it to velocity.",
+      "Call move_and_slide() in _physics_process(delta).",
+      "Run the lesson and confirm the preview player moves."
+    ]
+  },
+  {
+    "id": 97,
+    "title": "Add Mobile Touch Controls",
+    "category": "Input",
+    "difficulty": "Boss Level",
+    "summary": "Create simple touch-button logic for mobile-friendly play.",
+    "demo": "mobile",
+    "checks": [
+      "TouchScreenButton",
+      "pressed",
+      "velocity"
+    ],
+    "badge": "Boss Builder",
+    "badgeIcon": "\ud83d\udc51",
+    "solution": "extends CharacterBody2D\n\nvar speed = 220\n@onready var right_button: TouchScreenButton = $CanvasLayer/RightButton\n\nfunc _physics_process(delta):\n    velocity = Vector2.ZERO\n    if right_button.pressed:\n        velocity.x = speed\n    move_and_slide()\n",
+    "starter": "extends CharacterBody2D\n\n# TODO: Use TouchScreenButton.pressed to move.\n",
+    "hint": "TouchScreenButton has a pressed property you can read each frame.",
+    "steps": [
+      "Add a CanvasLayer with a TouchScreenButton for movement.",
+      "Create an @onready reference to the button.",
+      "Check the button pressed state in _physics_process(delta).",
+      "Set velocity based on the touch input.",
+      "Run the check and inspect the mobile control preview."
+    ]
+  },
+  {
+    "id": 98,
+    "title": "Add Accessibility Options",
+    "category": "UI",
+    "difficulty": "Boss Level",
+    "summary": "Create UI options for larger text and reduced screen shake.",
+    "demo": "accessibility",
+    "checks": [
+      "large_text",
+      "reduced_shake",
+      "$OptionsLabel.text"
+    ],
+    "badge": "UI Builder",
+    "badgeIcon": "\ud83e\udde9",
+    "solution": "extends Control\n\nvar large_text = true\nvar reduced_shake = true\n\nfunc apply_accessibility():\n    if large_text:\n        $OptionsLabel.text = \"Large Text: ON\"\n    if reduced_shake:\n        print(\"Screen shake reduced\")\n",
+    "starter": "extends Control\n\n# TODO: Add large_text and reduced_shake settings.\n",
+    "hint": "Accessibility options are game features. Store them in variables, then apply them to UI and effects.",
+    "steps": [
+      "Create variables for large text and reduced shake.",
+      "Write an apply_accessibility() function.",
+      "Update a Label so the player sees the chosen option.",
+      "Print or store reduced shake behavior for effects systems.",
+      "Run the lesson and confirm the option text changes."
+    ]
+  },
+  {
+    "id": 99,
+    "title": "Add a Cutscene Trigger",
+    "category": "Animation",
+    "difficulty": "Boss Level",
+    "summary": "Trigger a small intro cutscene with AnimationPlayer and locked controls.",
+    "demo": "cutscene",
+    "checks": [
+      "controls_locked",
+      "$AnimationPlayer.play",
+      "intro"
+    ],
+    "badge": "Animation Crafter",
+    "badgeIcon": "\ud83c\udf9e\ufe0f",
+    "solution": "extends Node2D\n\nvar controls_locked = false\n\nfunc play_intro():\n    controls_locked = true\n    $AnimationPlayer.play(\"intro\")\n\nfunc _on_animation_player_animation_finished(anim_name):\n    if anim_name == \"intro\":\n        controls_locked = false\n",
+    "starter": "extends Node2D\n\n# TODO: Play intro animation and lock controls.\n",
+    "hint": "Set controls_locked before the animation starts, then release it when the intro finishes.",
+    "steps": [
+      "Create a controls_locked boolean.",
+      "Play the intro animation from AnimationPlayer.",
+      "Prevent player input while controls_locked is true.",
+      "Listen for the animation finished callback.",
+      "Run the lesson and confirm the viewport shows the cutscene state."
+    ]
+  },
+  {
+    "id": 100,
+    "title": "Final Capstone: Build and Present Your Godot Mini Game",
+    "category": "Boss Level",
+    "difficulty": "Boss Level",
+    "summary": "Combine scenes, GDScript, UI, audio, save data, settings, and export planning into one complete mini-game blueprint.",
+    "demo": "final_capstone",
+    "checks": [
+      "Player",
+      "Enemy",
+      "HUD",
+      "GameManager",
+      "export_ready"
+    ],
+    "badge": "Godot Champion",
+    "badgeIcon": "\ud83c\udfc6",
+    "solution": "extends Node\n\nvar export_ready = false\nvar scenes = [\"Player\", \"Enemy\", \"HUD\", \"GameManager\"]\n\nfunc _ready():\n    for scene in scenes:\n        print(\"Capstone scene ready:\", scene)\n    export_ready = true\n",
+    "starter": "extends Node\n\n# TODO: List your Player, Enemy, HUD, and GameManager scenes.\n",
+    "hint": "A strong Godot capstone should name the main scenes and show the game is export_ready.",
+    "steps": [
+      "List your main scenes: Player, Enemy, HUD, and GameManager.",
+      "Explain what each scene controls in your game.",
+      "Add a simple export_ready variable for your final checklist.",
+      "Print the scene plan in _ready().",
+      "Run the lesson to earn the Godot Champion badge."
+    ]
+  }
+];
+
+  </script>
+  <script>
+const STORE_KEY = "godotQuestProgress.v1";
+const SESSION_KEY = "godotQuestSession.v1";
+
+const state = {
+  lessons: window.LESSONS || [],
+  order: [],
+  currentIndex: 0,
+  progress: {
+    completed: [],
+    badges: [],
+    xp: 0,
+    solutionsViewed: []
+  },
+  filters: {
+    difficulty: "all",
+    search: ""
+  }
+};
+
+const BADGE_CATALOG = [
+  ["Explorer", "🧭"], ["GDScript Rookie", "📜"], ["2D Pilot", "🛸"], ["Input Scout", "🎮"],
+  ["Signal Spark", "⚡"], ["Scene Builder", "🎬"], ["Physics Wrangler", "🧲"], ["UI Builder", "🧩"],
+  ["Combat Coder", "⚔️"], ["Animation Crafter", "🎞️"], ["Audio Alchemist", "🎧"], ["Resource Keeper", "💾"],
+  ["World Builder", "🗺️"], ["Inventory Keeper", "🎒"], ["Quest Designer", "📖"], ["AI Pathfinder", "🧠"],
+  ["System Architect", "🏗️"], ["Visual FX", "✨"], ["3D Starter", "🧊"], ["Network Novice", "🌐"],
+  ["Boss Builder", "👑"], ["Godot Champion", "🏆"]
+];
+
+const $ = (id) => document.getElementById(id);
+
+const els = {
+  lessonList: $("lessonList"),
+  title: $("lessonTitle"),
+  summary: $("lessonSummary"),
+  difficulty: $("lessonDifficulty"),
+  category: $("lessonCategory"),
+  steps: $("lessonSteps"),
+  editor: $("codeEditor"),
+  console: $("consoleOutput"),
+  sceneTree: $("sceneTree"),
+  inspector: $("inspector"),
+  canvas: $("previewCanvas"),
+  toast: $("toast")
+};
+
+const ctx = els.canvas.getContext("2d");
+let animationTick = 0;
+
+function loadProgress() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORE_KEY));
+    if (stored && Array.isArray(stored.completed)) {
+      state.progress = { completed: [], badges: [], xp: 0, solutionsViewed: [], ...stored };
+    }
+  } catch (error) {
+    console.warn("Could not load progress", error);
+  }
+}
+
+function saveProgress() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(state.progress));
+}
+
+function shuffle(array) {
+  const copy = [...array];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function loadSession() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(SESSION_KEY));
+    const valid = stored && Array.isArray(stored.order) && stored.order.length === state.lessons.length;
+    state.order = valid ? stored.order : shuffle(state.lessons.map((lesson) => lesson.id));
+  } catch {
+    state.order = shuffle(state.lessons.map((lesson) => lesson.id));
+  }
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ order: state.order }));
+}
+
+function startNewSession() {
+  state.order = shuffle(state.lessons.map((lesson) => lesson.id));
+  state.currentIndex = 0;
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ order: state.order }));
+  $("sessionLabel").textContent = "New Mixed Session";
+  renderAll();
+  toast("New mixed session created. Lessons are shuffled for variety.");
+}
+
+function currentLesson() {
+  return state.lessons.find((lesson) => lesson.id === state.order[state.currentIndex]) || state.lessons[0];
+}
+
+function orderedLessons() {
+  return state.order.map((id) => state.lessons.find((lesson) => lesson.id === id)).filter(Boolean);
+}
+
+function filteredLessons() {
+  const search = state.filters.search.trim().toLowerCase();
+  return orderedLessons().filter((lesson) => {
+    const matchDifficulty = state.filters.difficulty === "all" || lesson.difficulty === state.filters.difficulty;
+    const text = `${lesson.title} ${lesson.category} ${lesson.summary} ${lesson.difficulty}`.toLowerCase();
+    return matchDifficulty && (!search || text.includes(search));
+  });
+}
+
+function renderLessonList() {
+  const lessons = filteredLessons();
+  els.lessonList.innerHTML = "";
+  lessons.forEach((lesson) => {
+    const actualIndex = state.order.indexOf(lesson.id);
+    const complete = state.progress.completed.includes(lesson.id);
+    const btn = document.createElement("button");
+    btn.className = `lesson-item ${lesson.id === currentLesson().id ? "active" : ""} ${complete ? "completed" : ""}`;
+    btn.innerHTML = `
+      <div class="meta">
+        <span class="pill muted">#${lesson.id}</span>
+        <span class="pill">${lesson.difficulty}</span>
+      </div>
+      <strong>${complete ? "✅ " : ""}${lesson.title}</strong>
+      <small>${lesson.category}</small>
+    `;
+    btn.addEventListener("click", () => {
+      state.currentIndex = actualIndex;
+      renderAll(false);
+    });
+    els.lessonList.appendChild(btn);
+  });
+
+  if (!lessons.length) {
+    els.lessonList.innerHTML = `<p class="muted">No lessons match that filter.</p>`;
+  }
+}
+
+function renderCurrentLesson(resetCode = true) {
+  const lesson = currentLesson();
+  els.title.textContent = `${lesson.id}. ${lesson.title}`;
+  els.summary.textContent = lesson.summary;
+  els.difficulty.textContent = lesson.difficulty;
+  els.category.textContent = lesson.category;
+  els.steps.innerHTML = lesson.steps.map((step) => `<li>${step}</li>`).join("");
+  if (resetCode) els.editor.value = lesson.starter;
+  els.console.className = "console";
+  els.console.textContent = "Ready. Write your GDScript and press Run / Check.";
+  drawPreview(lesson, false);
+  renderScenePanels(lesson);
+}
+
+function renderProgress() {
+  const completed = new Set(state.progress.completed);
+  const percent = Math.round((completed.size / state.lessons.length) * 100);
+  $("progressPercent").textContent = `${percent}%`;
+  $("progressFill").style.width = `${percent}%`;
+  $("completedCount").textContent = completed.size;
+  $("badgeCount").textContent = state.progress.badges.length;
+  $("xpText").textContent = `${state.progress.xp} XP`;
+  $("playerTitle").textContent = titleForXp(state.progress.xp);
+
+  const earned = new Set(state.progress.badges);
+  $("badgeGrid").innerHTML = BADGE_CATALOG.map(([name, icon]) => `
+    <div class="badge ${earned.has(name) ? "earned" : ""}" title="${name}">
+      <span>${icon}</span><small>${name}</small>
+    </div>
+  `).join("");
+}
+
+function titleForXp(xp) {
+  if (xp >= 9000) return "Godot Champion";
+  if (xp >= 6500) return "Boss Builder";
+  if (xp >= 4200) return "Gameplay Engineer";
+  if (xp >= 2200) return "Scene Architect";
+  if (xp >= 900) return "GDScript Coder";
+  return "Scene Apprentice";
+}
+
+function renderAll(resetCode = true) {
+  renderLessonList();
+  renderCurrentLesson(resetCode);
+  renderProgress();
+}
+
+function normalize(code) {
+  return code.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function findErrors(code) {
+  const errors = [];
+  const lines = code.split("\n");
+  const normalized = normalize(code);
+
+  if (!normalized.includes("extends")) {
+    errors.push("Every Godot script should usually start by extending a node type, such as extends Node2D, Control, CharacterBody2D, or Node3D.");
+  }
+  lines.forEach((line, index) => {
+    const trimmed = line.trim();
+    if (/^(func|if|for|while|match|else|elif)\b/.test(trimmed) && !trimmed.endsWith(":")) {
+      errors.push(`Line ${index + 1}: GDScript blocks need a colon at the end.`);
+    }
+  });
+  if (normalized.includes("function ")) {
+    errors.push("GDScript uses func instead of JavaScript's function keyword.");
+  }
+  if (normalized.includes(";")) {
+    errors.push("Semicolons are not needed in normal GDScript style. Remove them for cleaner code.");
+  }
+  if (normalized.includes("== true") && normalized.includes("pressed")) {
+    errors.push("You can write if button.pressed: instead of comparing pressed == true.");
+  }
+  if (normalized.includes("queuefree")) {
+    errors.push("Use queue_free() with an underscore.");
+  }
+  if (normalized.includes("moveandslide")) {
+    errors.push("Use move_and_slide() with underscores.");
+  }
+  if (normalized.includes("_process") && normalized.includes("velocity") && normalized.includes("move_and_slide")) {
+    errors.push("Movement with velocity and move_and_slide() belongs in _physics_process(delta), not _process(delta). This is a coaching warning, not always fatal.");
+  }
+  return errors;
+}
+
+function checkLesson() {
+  const lesson = currentLesson();
+  const code = els.editor.value;
+  const normalized = normalize(code);
+  const missing = lesson.checks.filter((check) => !normalized.includes(check.toLowerCase()));
+  const coaching = findErrors(code);
+  const fatal = coaching.filter((message) => !message.startsWith("Movement with velocity"));
+
+  if (missing.length === 0 && fatal.length === 0) {
+    completeLesson(lesson);
+    els.console.className = "console good";
+    els.console.textContent = `✅ Great work! ${lesson.title} passed.\n\nPreview updated with: ${lesson.demo}.\nBadge target: ${lesson.badge}`;
+    drawPreview(lesson, true);
+    return;
+  }
+
+  els.console.className = "console bad";
+  let output = "⚠️ Not quite yet. Fix these items and run again:\n\n";
+  if (missing.length) {
+    output += "Missing required Godot concepts:\n" + missing.map((item) => `• ${item}`).join("\n") + "\n\n";
+  }
+  if (coaching.length) {
+    output += "Coach notes:\n" + coaching.map((item) => `• ${item}`).join("\n") + "\n\n";
+  }
+  output += `Hint: ${lesson.hint}`;
+  els.console.textContent = output;
+  drawPreview(lesson, false);
+}
+
+function completeLesson(lesson) {
+  if (!state.progress.completed.includes(lesson.id)) {
+    state.progress.completed.push(lesson.id);
+    state.progress.xp += xpForDifficulty(lesson.difficulty);
+  }
+  if (!state.progress.badges.includes(lesson.badge)) {
+    state.progress.badges.push(lesson.badge);
+    toast(`${lesson.badgeIcon} Badge earned: ${lesson.badge}`);
+  } else {
+    toast("Lesson completed. XP added to your training profile.");
+  }
+  saveProgress();
+  renderProgress();
+  renderLessonList();
+}
+
+function xpForDifficulty(diff) {
+  return { Beginner: 50, Intermediate: 85, Advanced: 125, "Boss Level": 180 }[diff] || 50;
+}
+
+function showHint() {
+  const lesson = currentLesson();
+  els.console.className = "console";
+  els.console.textContent = `💡 Hint\n${lesson.hint}\n\nTry writing it yourself before viewing the solution.`;
+}
+
+function showSolution() {
+  const lesson = currentLesson();
+  els.editor.value = lesson.solution;
+  if (!state.progress.solutionsViewed.includes(lesson.id)) {
+    state.progress.solutionsViewed.push(lesson.id);
+    saveProgress();
+  }
+  els.console.className = "console";
+  els.console.textContent = "Solution loaded. Run it to see the preview, then study why it works.";
+}
+
+function autoIndent() {
+  const lines = els.editor.value.split("\n");
+  let depth = 0;
+  const formatted = lines.map((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return "";
+    if (/^(else|elif|case)\b/.test(trimmed)) depth = Math.max(0, depth - 1);
+    const output = "    ".repeat(depth) + trimmed;
+    if (trimmed.endsWith(":") && !trimmed.startsWith("#")) depth += 1;
+    return output;
+  });
+  els.editor.value = formatted.join("\n");
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(els.editor.value).then(() => toast("Code copied to clipboard."));
+}
+
+function nextLesson() {
+  state.currentIndex = (state.currentIndex + 1) % state.order.length;
+  renderAll(true);
+}
+
+function prevLesson() {
+  state.currentIndex = (state.currentIndex - 1 + state.order.length) % state.order.length;
+  renderAll(true);
+}
+
+function renderScenePanels(lesson) {
+  const trees = {
+    default: ["Main", "Player", "Camera2D", "HUD"],
+    ui_label: ["HUD", "ScoreLabel"], button: ["MainMenu", "StartButton"], signal_button: ["Menu", "Button"],
+    physics_body: ["Player(CharacterBody2D)", "Sprite2D", "CollisionShape2D"], gravity: ["Player", "Ground", "CollisionShape2D"], jump: ["Player", "Ground"],
+    spawn_coin: ["Level", "CoinScene", "SpawnPoint"], collect_coin: ["Coin(Area2D)", "CollisionShape2D"],
+    enemy_ai: ["Enemy", "Player", "NavigationTarget"], nav_agent: ["Enemy", "NavigationAgent2D", "Player"],
+    node3d: ["World3D", "Player(Node3D)", "Camera3D"], body3d: ["Player(CharacterBody3D)", "MeshInstance3D", "CollisionShape3D"],
+    boss_player: ["Player", "Sprite2D", "AnimationPlayer", "CollisionShape2D"], final_capstone: ["Game", "Player", "Enemy", "HUD", "GameManager"]
+  };
+  const list = trees[lesson.demo] || trees.default;
+  els.sceneTree.innerHTML = list.map((item) => `<li>${item}</li>`).join("");
+  els.inspector.innerHTML = `
+    <div><strong>Script:</strong> ${lesson.category}</div>
+    <div><strong>Difficulty:</strong> ${lesson.difficulty}</div>
+    <div><strong>Checks:</strong> ${lesson.checks.join(", ")}</div>
+    <div><strong>Demo:</strong> ${lesson.demo}</div>
+  `;
+}
+
+function drawGrid() {
+  ctx.clearRect(0, 0, els.canvas.width, els.canvas.height);
+  const w = els.canvas.width;
+  const h = els.canvas.height;
+  const gradient = ctx.createLinearGradient(0, 0, 0, h);
+  gradient.addColorStop(0, "#193962");
+  gradient.addColorStop(1, "#06111f");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.strokeStyle = "rgba(255,255,255,0.08)";
+  ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += 40) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+  }
+  for (let y = 0; y < h; y += 40) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+  }
+}
+
+function drawPlayer(x, y, label = "Player") {
+  ctx.fillStyle = "#43d3ff";
+  ctx.beginPath();
+  ctx.roundRect(x - 18, y - 26, 36, 52, 10);
+  ctx.fill();
+  ctx.fillStyle = "#06111f";
+  ctx.fillRect(x - 8, y - 6, 16, 16);
+  ctx.fillStyle = "#edf6ff";
+  ctx.font = "14px sans-serif";
+  ctx.fillText(label, x - 22, y + 45);
+}
+
+function drawEnemy(x, y) {
+  ctx.fillStyle = "#ff6b88";
+  ctx.beginPath();
+  ctx.arc(x, y, 22, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.fillText("Enemy", x - 22, y + 42);
+}
+
+function drawCoin(x, y) {
+  ctx.fillStyle = "#ffca6a";
+  ctx.beginPath();
+  ctx.arc(x, y, 14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,0.8)";
+  ctx.stroke();
+}
+
+function drawLabel(text, x, y) {
+  ctx.fillStyle = "rgba(4,10,20,0.75)";
+  ctx.roundRect(x - 10, y - 26, Math.max(150, text.length * 9), 42, 12);
+  ctx.fill();
+  ctx.fillStyle = "#edf6ff";
+  ctx.font = "18px sans-serif";
+  ctx.fillText(text, x, y);
+}
+
+function drawPreview(lesson, passed = false) {
+  drawGrid();
+  animationTick += 0.12;
+  const t = animationTick;
+  const movingX = 120 + Math.sin(t) * 70;
+  const demo = lesson.demo;
+
+  ctx.fillStyle = "rgba(137,255,203,0.12)";
+  ctx.fillRect(0, 310, 640, 80);
+  ctx.fillStyle = "rgba(137,255,203,0.45)";
+  ctx.fillRect(0, 310, 640, 5);
+
+  if (demo.includes("3d") || ["node3d", "mesh_rotate", "body3d", "camera3d", "raycast", "boss_3d"].includes(demo)) {
+    ctx.save();
+    ctx.translate(320, 190);
+    ctx.rotate(passed ? t : 0.4);
+    ctx.fillStyle = "#43d3ff";
+    ctx.fillRect(-42, -42, 84, 84);
+    ctx.strokeStyle = "#89ffcb";
+    ctx.lineWidth = 4;
+    ctx.strokeRect(-42, -42, 84, 84);
+    ctx.restore();
+    drawLabel("3D Node Preview", 34, 48);
+  } else if (demo.includes("ui") || demo.includes("menu") || demo.includes("pause") || demo.includes("settings") || demo === "button" || demo === "signal_button" || demo === "accessibility") {
+    drawLabel(passed ? "Score: 5  |  UI Updated" : "HUD Preview", 40, 52);
+    ctx.fillStyle = passed ? "#89ffcb" : "#43d3ff";
+    ctx.roundRect(230, 150, 180, 60, 18);
+    ctx.fill();
+    ctx.fillStyle = "#06111f";
+    ctx.font = "20px sans-serif";
+    ctx.fillText(passed ? "Button Works" : "Start", 267, 187);
+  } else if (demo.includes("coin") || demo.includes("pickup") || demo.includes("inventory") || demo.includes("quest")) {
+    drawPlayer(135, 280);
+    [250, 300, 350, 400].forEach((x, i) => drawCoin(x, 240 + Math.sin(t + i) * 10));
+    drawLabel(passed ? "Collected + Inventory Updated" : "Collectibles", 34, 52);
+  } else if (demo.includes("enemy") || demo.includes("combat") || demo.includes("boss") || demo.includes("damage") || demo.includes("projectile") || demo.includes("fight") || demo.includes("waves")) {
+    drawPlayer(140, 280);
+    drawEnemy(passed ? movingX + 260 : 430, 280);
+    ctx.strokeStyle = "#ffca6a";
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath(); ctx.moveTo(168, 260); ctx.lineTo(410, 260); ctx.stroke();
+    ctx.setLineDash([]);
+    drawLabel(passed ? "Combat Logic Passed" : "Enemy Test", 34, 52);
+  } else if (demo.includes("animation") || demo.includes("cutscene") || demo.includes("shader") || demo.includes("particles") || demo.includes("light")) {
+    drawPlayer(320, 240, passed ? "Animated" : "Sprite");
+    ctx.strokeStyle = passed ? "#89ffcb" : "#43d3ff";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(320, 240, 62 + Math.sin(t) * 8, 0, Math.PI * 2);
+    ctx.stroke();
+    drawLabel(passed ? "FX / Animation Playing" : "Animation Preview", 34, 52);
+  } else {
+    drawPlayer(passed ? movingX + 160 : 220, 280);
+    if (demo.includes("gravity") || demo.includes("jump") || demo.includes("platformer")) {
+      drawLabel(passed ? "Gravity + Jump Active" : "Physics Test", 34, 52);
+    } else if (demo.includes("input") || demo.includes("controller") || demo.includes("mobile")) {
+      drawLabel(passed ? "Input Movement Active" : "Input Test", 34, 52);
+    } else {
+      drawLabel(passed ? "Script Passed" : "Scene Preview", 34, 52);
+    }
+  }
+
+  if (passed) {
+    ctx.fillStyle = "rgba(101,229,142,0.18)";
+    ctx.fillRect(0, 0, 640, 390);
+    ctx.fillStyle = "#65e58e";
+    ctx.font = "bold 18px sans-serif";
+    ctx.fillText("✅ Lesson Passed", 470, 36);
+  }
+}
+
+function toast(message) {
+  els.toast.textContent = message;
+  els.toast.classList.add("show");
+  window.clearTimeout(toast.timer);
+  toast.timer = window.setTimeout(() => els.toast.classList.remove("show"), 2800);
+}
+
+function resetProgress() {
+  if (!confirm("Reset all lesson progress and badges?")) return;
+  localStorage.removeItem(STORE_KEY);
+  state.progress = { completed: [], badges: [], xp: 0, solutionsViewed: [] };
+  renderAll(false);
+  toast("Progress reset.");
+}
+
+function createCertificate() {
+  const completed = state.progress.completed.length;
+  const badges = state.progress.badges.length;
+  const win = window.open("", "_blank");
+  const date = new Date().toLocaleDateString();
+  win.document.write(`
+    <html><head><title>Godot Quest Certificate</title>
+    <style>body{font-family:Arial;padding:50px;background:#08111f;color:#edf6ff;text-align:center} .cert{border:8px solid #43d3ff;padding:40px;border-radius:24px} h1{font-size:46px} p{font-size:22px}</style></head>
+    <body><div class="cert"><h1>Certificate of Completion</h1><p>This certifies that</p><h2>Shocka Holmes</h2><p>completed ${completed}/100 Godot Quest Trainer lessons and earned ${badges} badges.</p><p>${date}</p><button onclick="print()">Print Certificate</button></div></body></html>
+  `);
+  win.document.close();
+}
+
+async function readLessonWithElevenLabs() {
+  const key = $("elevenKey").value.trim();
+  const voiceId = $("voiceId").value.trim();
+  const lesson = currentLesson();
+  if (!key || !voiceId) {
+    toast("Add an ElevenLabs API key and voice ID first.");
+    return;
+  }
+  const text = `${lesson.title}. ${lesson.summary}. Steps. ${lesson.steps.join(" ")}. Hint. ${lesson.hint}`;
+  els.console.className = "console";
+  els.console.textContent = "Requesting ElevenLabs narration...";
+  try {
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: "POST",
+      headers: {
+        "Accept": "audio/mpeg",
+        "Content-Type": "application/json",
+        "xi-api-key": key
+      },
+      body: JSON.stringify({
+        text,
+        model_id: "eleven_multilingual_v2",
+        voice_settings: { stability: 0.45, similarity_boost: 0.75 }
+      })
+    });
+    if (!response.ok) throw new Error(`ElevenLabs request failed: ${response.status}`);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = $("lessonAudio");
+    audio.src = url;
+    audio.play();
+    els.console.textContent = "Narration ready. Audio is playing.";
+  } catch (error) {
+    els.console.className = "console bad";
+    els.console.textContent = `Could not create narration. ${error.message}\nCheck your API key, voice ID, and browser CORS/network access.`;
+  }
+}
+
+function bindEvents() {
+  $("newSessionBtn").addEventListener("click", startNewSession);
+  $("resetBtn").addEventListener("click", resetProgress);
+  $("certificateBtn").addEventListener("click", createCertificate);
+  $("runBtn").addEventListener("click", checkLesson);
+  $("hintBtn").addEventListener("click", showHint);
+  $("solutionBtn").addEventListener("click", showSolution);
+  $("formatBtn").addEventListener("click", autoIndent);
+  $("copyBtn").addEventListener("click", copyCode);
+  $("nextBtn").addEventListener("click", nextLesson);
+  $("prevBtn").addEventListener("click", prevLesson);
+  $("readLessonBtn").addEventListener("click", readLessonWithElevenLabs);
+  $("difficultyFilter").addEventListener("change", (event) => {
+    state.filters.difficulty = event.target.value;
+    renderLessonList();
+  });
+  $("searchInput").addEventListener("input", (event) => {
+    state.filters.search = event.target.value;
+    renderLessonList();
+  });
+
+  els.editor.addEventListener("keydown", (event) => {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      const start = els.editor.selectionStart;
+      const end = els.editor.selectionEnd;
+      els.editor.value = els.editor.value.substring(0, start) + "    " + els.editor.value.substring(end);
+      els.editor.selectionStart = els.editor.selectionEnd = start + 4;
+    }
+    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+      event.preventDefault();
+      checkLesson();
+    }
+  });
+}
+
+function animate() {
+  const lesson = currentLesson();
+  const completed = state.progress.completed.includes(lesson.id);
+  drawPreview(lesson, completed);
+  requestAnimationFrame(animate);
+}
+
+function init() {
+  if (!state.lessons.length) {
+    document.body.innerHTML = "<h1>Lessons failed to load.</h1>";
+    return;
+  }
+  loadProgress();
+  loadSession();
+  bindEvents();
+  renderAll(true);
+  animate();
+}
+
+init();
+
+  </script>
+</body>
+</html>

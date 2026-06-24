@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>Welcome Training Simulator</title>
+<style>
+body{font-family:Arial,sans-serif;background:#101827;color:#fff;margin:0;padding:32px;line-height:1.6}
+.card{max-width:850px;margin:auto;background:linear-gradient(135deg,#1d2b50,#172036);border:1px solid rgba(255,255,255,.16);border-radius:24px;padding:32px;box-shadow:0 24px 80px rgba(0,0,0,.35)}
+button{background:#73e2ff;color:#0b1020;border:0;border-radius:999px;padding:12px 22px;font-weight:800;cursor:pointer} .step{display:none}.step.active{display:block}.badge{display:inline-block;padding:6px 12px;border-radius:999px;background:rgba(115,226,255,.16);color:#99ecff}
+</style>
+</head>
+<body><main class='card'>
+<span class='badge'>Demo Simulator</span>
+<h1>Welcome to Your Training Portal</h1>
+<div class='step active'><h2>Lesson 1: Start</h2><p>This is a sample simulator. Upload your own HTML or ZIP simulator from the admin panel.</p></div>
+<div class='step'><h2>Lesson 2: Practice</h2><p>Training simulators can include quizzes, code editors, games, videos, or interactive lessons.</p></div>
+<div class='step'><h2>Lesson 3: Complete</h2><p>Return to the portal and click <strong>Mark Complete</strong> to generate a certificate.</p></div>
+<button onclick='nextStep()'>Next Step</button>
+</main><script>
+let i=0;const steps=[...document.querySelectorAll('.step')];function nextStep(){steps[i].classList.remove('active');i=(i+1)%steps.length;steps[i].classList.add('active')}
+</script></body></html>
